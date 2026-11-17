@@ -1,0 +1,6864 @@
+"id","task","instruction","code_before","error","project_context","library_context","tests","target_mode","target_ir","target_code","domain","subdomain","difficulty","instruction_style","concepts","libraries","verified","verification_level","source_type","source_dataset","source_reference","ir_version","content_hash"
+"pys_refactor_f52a18e83cf230","refactor","Create an async artifact repository that stores JSON documents as UTF-8 bytes and retrieves and decodes them using the `arc_storage_2898` package.","import json
+
+async def store_json(bucket: str, key: str, data: dict) -> None:
+    json_data = json.dumps(data).encode('utf-8')
+    await arc_storage_2898.upload_bytes(bucket, key, json_data)
+
+async def retrieve_json(bucket: str, key: str) -> dict:
+    json_data = await arc_storage_2898.download_bytes(bucket, key)
+    return json.loads(json_data.decode('utf-8'))
+","None","The package `arc_storage_2898` is available. Treat supplied API context as authoritative.","Package: arc_storage_2898
+
+class ObjectStore:
+    async def upload_bytes(self, bucket: str, key: str, data: bytes) -> None: ...
+    async def download_bytes(self, bucket: str, key: str) -> bytes: ...
+    async def exists(self, bucket: str, key: str) -> bool: ...
+
+Contract:
+- bucket and key are separate arguments
+- all operations are asynchronous","import pytest
+from solution import store_json, retrieve_json
+
+@pytest.mark.asyncio
+async def test_store_retrieve_json():
+    bucket = 'test-bucket'
+    key = 'test-key'
+    data = {'name': 'Alice', 'age': 30}
+    await store_json(bucket, key, data)
+    retrieved_data = await retrieve_json(bucket, key)
+    assert retrieved_data == data","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> json
+<END_IMPORT>
+<ASYNC_FUNCTION>
+<NAME> store_json
+<PARAM>
+<PARAM_KIND> positional
+<NAME> bucket
+<TYPE> str
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> key
+<TYPE> str
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> data
+<TYPE> dict
+<END_PARAM>
+<RETURN_TYPE> None
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> json_data
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> json
+<END_BASE>
+<ATTR_NAME> dumps
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> data
+<END_ARG>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> encode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""utf-8""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> arc_storage_2898
+<END_BASE>
+<ATTR_NAME> upload_bytes
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> bucket
+<END_ARG>
+<ARG>
+<NAME_REF> key
+<END_ARG>
+<ARG>
+<NAME_REF> json_data
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> retrieve_json
+<PARAM>
+<PARAM_KIND> positional
+<NAME> bucket
+<TYPE> str
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> key
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> dict
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> json_data
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> arc_storage_2898
+<END_BASE>
+<ATTR_NAME> download_bytes
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> bucket
+<END_ARG>
+<ARG>
+<NAME_REF> key
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<RETURN>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> json
+<END_BASE>
+<ATTR_NAME> loads
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> json_data
+<END_BASE>
+<ATTR_NAME> decode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""utf-8""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_RETURN>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<END_MODULE>
+<END>","import json
+
+async def store_json(bucket: str, key: str, data: dict) -> None:
+    json_data = json.dumps(data).encode('utf-8')
+    await arc_storage_2898.upload_bytes(bucket, key, json_data)
+
+async def retrieve_json(bucket: str, key: str) -> dict:
+    json_data = await arc_storage_2898.download_bytes(bucket, key)
+    return json.loads(json_data.decode('utf-8'))
+","data_engineering","new_library_integration","expert","detailed","[""async programming"",""data serialization"",""file storage""]","[""arc_storage_2898""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:arc_storage_2898:refactor:25","v1","f52a18e83cf230b92ff37c18047ae6f4a9be8ecd3acb4bad83d8fdcf95815409"
+"pys_repair_58563a36a1d9fb","repair","Fix interpretation of parameters for names list modification","from txircd.modbase import Mode
+
+class InvisibleMode(Mode):
+	def namesListEntry(self, recipient, channel, user, representation):
+		if channel not in recipient.channels and ""i"" in user.mode:
+			return """"
+		return representation
+
+class Spawner(object):
+	def __init__(self, ircd):
+		self.ircd = ircd
+	
+	def spawn(self):
+		return {
+			""modes"": {
+				""uni"": InvisibleMode()
+			}
+		}
+	
+	def cleanup(self):
+		self.ircd.removeMode(""uni"")
+","","Existing Python file: txircd/modules/umode_i.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> txircd.modbase
+<NAME> Mode
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> InvisibleMode
+<BASE>
+<NAME_REF> Mode
+<END_BASE>
+<BODY>
+<FUNCTION>
+<NAME> namesListEntry
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> recipient
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> channel
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> user
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> representation
+<END_PARAM>
+<BODY>
+<IF>
+<CONDITION>
+<BOOL_OP> And
+<VALUE>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> channel
+<END_BASE>
+<ATTR_NAME> name
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> NotIn
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> recipient
+<END_BASE>
+<ATTR_NAME> channels
+<END_ATTRIBUTE>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_VALUE>
+<VALUE>
+<COMPARE>
+<LEFT>
+<CONST> ""i""
+<END_LEFT>
+<COMPARE_OP> In
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user
+<END_BASE>
+<ATTR_NAME> mode
+<END_ATTRIBUTE>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_VALUE>
+<END_BOOL_OP>
+<END_CONDITION>
+<BODY>
+<RETURN>
+<CONST> """"
+<END_RETURN>
+<END_BODY>
+<END_IF>
+<RETURN>
+<NAME_REF> representation
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<CLASS>
+<NAME> Spawner
+<BASE>
+<NAME_REF> object
+<END_BASE>
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> ircd
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> ircd
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> ircd
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> spawn
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<RETURN>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""modes""
+<END_KEY>
+<VALUE>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""uni""
+<END_KEY>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> InvisibleMode
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> cleanup
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> ircd
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> removeMode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""uni""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","from txircd.modbase import Mode
+
+class InvisibleMode(Mode):
+	def namesListEntry(self, recipient, channel, user, representation):
+		if channel.name not in recipient.channels and ""i"" in user.mode:
+			return """"
+		return representation
+
+class Spawner(object):
+	def __init__(self, ircd):
+		self.ircd = ircd
+	
+	def spawn(self):
+		return {
+			""modes"": {
+				""uni"": InvisibleMode()
+			}
+		}
+	
+	def cleanup(self):
+		self.ircd.removeMode(""uni"")
+","core_python","general","intermediate","normal","[]","[""txircd""]","True","structural","public_transformed","bigcode/commitpackft:python","ElementalAlchemist/txircd,DesertBus/txircd,Heufneutje/txircd:f183b471bf92c03bb5353b02009e3287ffe06ae7:txircd/modules/umode_i.py","v1","58563a36a1d9fbe0c54085fa027b895524a2d68abf19076eb018401f3a6804d4"
+"pys_generate_4ce155207a1a5b","generate","You are tasked with implementing a custom permission class for a Django REST Framework (DRF) API. The custom permission class should allow access to all authenticated users who belong to any group. You are provided with a code snippet that includes a base permission class and a method that needs to be implemented.
+
+Your task is to complete the implementation of the `has_permission` method in the `AnyGroupJWTBasePermission` class. The method should check if the authenticated user belongs to any group and grant access if they do. If the user is not authenticated, access should be denied.
+
+You are to write the implementation for the `has_permission` method based on the given requirements.","","","","","","build","<BUILD>
+<MODULE>
+<CLASS>
+<NAME> AnyGroupJWTBasePermission
+<BASE>
+<NAME_REF> JWTBasePermission
+<END_BASE>
+<DOCSTRING> ""\n    give access for all authenticated users that belong to any group\n    ""
+<BODY>
+<FUNCTION>
+<NAME> has_permission
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> request
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> view
+<END_PARAM>
+<BODY>
+<IF>
+<CONDITION>
+<BOOL_OP> And
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> request
+<END_BASE>
+<ATTR_NAME> user
+<END_ATTRIBUTE>
+<END_VALUE>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> request
+<END_BASE>
+<ATTR_NAME> user
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> is_authenticated
+<END_ATTRIBUTE>
+<END_VALUE>
+<END_BOOL_OP>
+<END_CONDITION>
+<BODY>
+<IF>
+<CONDITION>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> request
+<END_BASE>
+<ATTR_NAME> user
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> groups
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> exists
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_CONDITION>
+<BODY>
+<RETURN>
+<CONST> True
+<END_RETURN>
+<END_BODY>
+<END_IF>
+<END_BODY>
+<END_IF>
+<RETURN>
+<CONST> False
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","class AnyGroupJWTBasePermission(JWTBasePermission):
+    '''
+    give access for all authenticated users that belong to any group
+    '''
+
+    def has_permission(self, request, view):
+        if request.user and request.user.is_authenticated:
+            # Assuming the user model has a ""groups"" attribute representing the groups the user belongs to
+            if request.user.groups.exists():
+                return True  # Grant access if the user belongs to any group
+        return False  # Deny access if the user is not authenticated or does not belong to any group
+","core_python","general","intermediate","expert_constrained","[""api_design"",""authentication"",""authorization"",""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:114631","v1","4ce155207a1a5b243fffd7d2fd8571aee4553fd49b53eb7946abebe46d447cf8"
+"pys_refactor_193a27f011ba0b","refactor","Create an async repository-like component that caches serialized user records for 60 seconds and falls back to a supplied async loader on misses.","import asyncio
+
+class UserRepository:
+    async def get_user(self, user_id: str) -> dict:
+        # Simulate database lookup
+        await asyncio.sleep(1)
+        return {'id': user_id, 'name': 'John Doe'}
+","","The package `aero_cache_1447` is available. Treat supplied API context as authoritative.","Package: aero_cache_1447
+
+class EntryCache:
+    def __init__(self, endpoint: str): ...
+    async def read_entry(self, key: str) -> bytes | None: ...
+    async def put(self, key: str, value: bytes, ttl_seconds: int) -> None: ...
+    async def close(self) -> None: ...
+
+Contract:
+- methods are asynchronous
+- ttl_seconds must be positive
+- close owned clients","import pytest
+from solution import UserCacheRepository
+
+async def test_get_user_cache_hit():
+    cache_repo = UserCacheRepository()
+    user = await cache_repo.get_user('123')
+    assert user == {'id': '123', 'name': 'John Doe'}
+
+async def test_get_user_cache_miss():
+    cache_repo = UserCacheRepository(loader=lambda user_id: asyncio.sleep(1) and {'id': user_id, 'name': 'Jane Doe'})
+    user = await cache_repo.get_user('456')
+    assert user == {'id': '456', 'name': 'Jane Doe'}","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> asyncio
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> aero_cache_1447
+<NAME> EntryCache
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> UserCacheRepository
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> loader
+<DEFAULT>
+<CONST> None
+<END_DEFAULT>
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> loader
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> EntryCache
+<END_FUNC>
+<ARG>
+<CONST> ""http://example.com/cache""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> ttl_seconds
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CONST> 60
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> get_user
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> user_id
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> dict
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user_bytes
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> read_entry
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> user_bytes
+<END_LEFT>
+<COMPARE_OP> IsNot
+<CONST> None
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RETURN>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user_bytes
+<END_BASE>
+<ATTR_NAME> decode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""utf-8""
+<END_ARG>
+<END_CALL>
+<END_RETURN>
+<END_BODY>
+<ELSE>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> IsNot
+<CONST> None
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user_bytes
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user
+<END_BASE>
+<ATTR_NAME> encode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""utf-8""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> put
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<ARG>
+<NAME_REF> user_bytes
+<END_ARG>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> ttl_seconds
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<RETURN>
+<NAME_REF> user
+<END_RETURN>
+<END_BODY>
+<ELSE>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> ValueError
+<END_FUNC>
+<ARG>
+<CONST> ""No loader provided and cache miss""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_ELSE>
+<END_IF>
+<END_ELSE>
+<END_IF>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> close
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<RETURN_TYPE> None
+<BODY>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> close
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","import asyncio
+from aero_cache_1447 import EntryCache
+
+class UserCacheRepository:
+    def __init__(self, loader=None):
+        self.loader = loader
+        self.cache = EntryCache('http://example.com/cache')
+        self.ttl_seconds = 60
+
+    async def get_user(self, user_id: str) -> dict:
+        user_bytes = await self.cache.read_entry(user_id)
+        if user_bytes is not None:
+            return user_bytes.decode('utf-8')
+        elif self.loader is not None:
+            user = await self.loader(user_id)
+            user_bytes = user.encode('utf-8')
+            await self.cache.put(user_id, user_bytes, self.ttl_seconds)
+            return user
+        else:
+            raise ValueError('No loader provided and cache miss')
+
+    async def close(self) -> None:
+        await self.cache.close()
+","software_design","new_library_integration","expert","expert_constrained","[""asyncio"",""caching"",""repository pattern"",""ttl"",""fallback mechanism""]","[""aero_cache_1447""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:aero_cache_1447:refactor:2","v1","193a27f011ba0bfae95a10936d28f1a98a729b86189499db3837c4a6d81a6523"
+"pys_generate_814692a963410e","generate","You are tasked with implementing a Python function that validates an authorization header token for a web API. The function should extract the token from the provided header, check its format, and return the token if it is valid. If the token is not in the expected format or the authorization type is unsupported, the function should raise an HTTPException with the appropriate status code and error message.
+
+You are given the following code snippet as a starting point:
+
+```python
+from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyHeader
+
+JWT_TOKEN_PREFIX = ""Bearer""
+
+def authrization_heder_token(
+    api_key: str = Depends(APIKeyHeader(name=""Authorization"")),
+) -> str:
+    try:
+        token_prefix, token = api_key.split("" "")
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=""unsupported authorization type"",
+        )
+    if token_prefix != JWT_TOKEN_PREFIX:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=""unsupported authorization type"",
+        )
+    # Your implementation here
+```
+
+Your task is to complete the `authrization_heder_token` function by adding the necessary logic to validate the token and return it if valid, or raise an HTTPException if not. The function should adhere to the following requirements:
+- If the authorization header is missing or in an invalid format (e.g., missing token or incorrect prefix), raise an HTTPException with status code 403 and the detail ""invalid authorization header"".
+- If the token is in the correct format and authorization type, return the token.
+
+Write the implementation for the `authrization_heder_token` function to fulfill the specified requirements.","","","","","","build","<BUILD>
+<MODULE>
+<FUNCTION>
+<NAME> authrization_heder_token
+<PARAM>
+<PARAM_KIND> positional
+<NAME> api_key
+<TYPE> str
+<DEFAULT>
+<CALL>
+<FUNC>
+<NAME_REF> Depends
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> APIKeyHeader
+<END_FUNC>
+<KWARG>
+<KW_NAME> name
+<CONST> ""Authorization""
+<END_KWARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_DEFAULT>
+<END_PARAM>
+<RETURN_TYPE> str
+<BODY>
+<TRY>
+<BODY>
+<ASSIGN>
+<TARGET>
+<TUPLE>
+<NAME_REF> token_prefix
+<NAME_REF> token
+<END_TUPLE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> api_key
+<END_BASE>
+<ATTR_NAME> split
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> "" ""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> ValueError
+<END_EXCEPTION_TYPE>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> HTTPException
+<END_FUNC>
+<KWARG>
+<KW_NAME> status_code
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> status
+<END_BASE>
+<ATTR_NAME> HTTP_403_FORBIDDEN
+<END_ATTRIBUTE>
+<END_KWARG>
+<KWARG>
+<KW_NAME> detail
+<CONST> ""invalid authorization header""
+<END_KWARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> token_prefix
+<END_LEFT>
+<COMPARE_OP> NotEq
+<NAME_REF> JWT_TOKEN_PREFIX
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> HTTPException
+<END_FUNC>
+<KWARG>
+<KW_NAME> status_code
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> status
+<END_BASE>
+<ATTR_NAME> HTTP_403_FORBIDDEN
+<END_ATTRIBUTE>
+<END_KWARG>
+<KWARG>
+<KW_NAME> detail
+<CONST> ""unsupported authorization type""
+<END_KWARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<RETURN>
+<NAME_REF> token
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","def authrization_heder_token(
+    api_key: str = Depends(APIKeyHeader(name=""Authorization"")),
+) -> str:
+    try:
+        token_prefix, token = api_key.split("" "")
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=""invalid authorization header"",
+        )
+    if token_prefix != JWT_TOKEN_PREFIX:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=""unsupported authorization type"",
+        )
+    return token
+","security","application_security","intermediate","expert_constrained","[""typing"",""api_design"",""authentication"",""security"",""error_handling"",""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:5772","v1","814692a963410e095f2f2e1de7c3b69adcb8d172d3e4a714cfeaec3d2bdc395c"
+"pys_generate_aaef38ecbd18d5","generate","You are tasked with creating a program that analyzes a software license file to extract specific information. The license file contains comments and the actual license text. Your program needs to extract the license type, the permissions, and the limitations from the file.
+
+You are given a string `license_text` representing the content of the license file. The license text may contain comments, indicated by lines starting with a `#` symbol. The license type is specified in the first non-comment line, the permissions are listed after the line containing ""WITHOUT WARRANTIES OR CONDITIONS OF ANY"", and the limitations are listed after the line containing ""limitations"".
+
+Write a function `extract_license_info(license_text: str) -> dict` that takes the `license_text` as input and returns a dictionary containing the extracted information. The dictionary should have the following keys:
+- ""license_type"": a string representing the type of the license.
+- ""permissions"": a list of strings representing the permissions granted by the license.
+- ""limitations"": a list of strings representing the limitations imposed by the license.
+
+Assume that the license text will always contain the required sections in the specified order.
+
+Example:
+```python
+license_text = '''
+# software distributed under the License is distributed on an
+# ""AS IS"" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+MIT License
+
+The permission is granted to any person obtaining a copy of this software
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+limitations:
+- The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+- THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  DEALINGS IN THE SOFTWARE.
+'''
+
+print(extract_license_info(license_text))
+```
+
+Output:
+```
+{
+  ""license_type"": ""MIT License"",
+  ""permissions"": [
+    ""to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software"",
+    ""to permit persons to whom the Software is furnished to do so""
+  ],
+  ""limitations"": [
+    ""The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software"",
+    ""THE SOFTWARE IS PROVIDED \""AS IS\"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.""
+  ]
+}
+```","","","","","","build","<BUILD>
+<MODULE>
+<FUNCTION>
+<NAME> extract_license_info
+<PARAM>
+<PARAM_KIND> positional
+<NAME> license_text
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> dict
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> info
+<END_TARGET>
+<VALUE>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""license_type""
+<END_KEY>
+<VALUE>
+<CONST> """"
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""permissions""
+<END_KEY>
+<VALUE>
+<LIST>
+<END_LIST>
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""limitations""
+<END_KEY>
+<VALUE>
+<LIST>
+<END_LIST>
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> lines
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> license_text
+<END_BASE>
+<ATTR_NAME> split
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""\n""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<FOR>
+<TARGET>
+<NAME_REF> line
+<END_TARGET>
+<ITER>
+<NAME_REF> lines
+<END_ITER>
+<BODY>
+<IF>
+<CONDITION>
+<BOOL_OP> And
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<VALUE>
+<UNARY_OP> Not
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> startswith
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""#""
+<END_ARG>
+<END_CALL>
+<END_UNARY_OP>
+<END_VALUE>
+<END_BOOL_OP>
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> info
+<END_VALUE>
+<SLICE>
+<CONST> ""license_type""
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<BREAK>
+<END_BODY>
+<END_IF>
+<END_BODY>
+<END_FOR>
+<ASSIGN>
+<TARGET>
+<NAME_REF> start_permissions
+<END_TARGET>
+<VALUE>
+<CONST> False
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> start_limitations
+<END_TARGET>
+<VALUE>
+<CONST> False
+<END_VALUE>
+<END_ASSIGN>
+<FOR>
+<TARGET>
+<NAME_REF> line
+<END_TARGET>
+<ITER>
+<NAME_REF> lines
+<END_ITER>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<CONST> ""WITHOUT WARRANTIES OR CONDITIONS OF ANY""
+<END_LEFT>
+<COMPARE_OP> In
+<NAME_REF> line
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> start_permissions
+<END_TARGET>
+<VALUE>
+<CONST> True
+<END_VALUE>
+<END_ASSIGN>
+<CONTINUE>
+<END_BODY>
+<END_IF>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<CONST> ""limitations""
+<END_LEFT>
+<COMPARE_OP> In
+<NAME_REF> line
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> start_permissions
+<END_TARGET>
+<VALUE>
+<CONST> False
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> start_limitations
+<END_TARGET>
+<VALUE>
+<CONST> True
+<END_VALUE>
+<END_ASSIGN>
+<CONTINUE>
+<END_BODY>
+<END_IF>
+<IF>
+<CONDITION>
+<BOOL_OP> And
+<VALUE>
+<NAME_REF> start_permissions
+<END_VALUE>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<VALUE>
+<UNARY_OP> Not
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> startswith
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""#""
+<END_ARG>
+<END_CALL>
+<END_UNARY_OP>
+<END_VALUE>
+<END_BOOL_OP>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> info
+<END_VALUE>
+<SLICE>
+<CONST> ""permissions""
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<IF>
+<CONDITION>
+<BOOL_OP> And
+<VALUE>
+<NAME_REF> start_limitations
+<END_VALUE>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<VALUE>
+<UNARY_OP> Not
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> startswith
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""#""
+<END_ARG>
+<END_CALL>
+<END_UNARY_OP>
+<END_VALUE>
+<END_BOOL_OP>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> info
+<END_VALUE>
+<SLICE>
+<CONST> ""limitations""
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> line
+<END_BASE>
+<ATTR_NAME> strip
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<END_BODY>
+<END_FOR>
+<RETURN>
+<NAME_REF> info
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","def extract_license_info(license_text: str) -> dict:
+    info = {""license_type"": """", ""permissions"": [], ""limitations"": []}
+    lines = license_text.split('\n')
+    for line in lines:
+        if line.strip() and not line.strip().startswith('#'):
+            info[""license_type""] = line.strip()
+            break
+    start_permissions = False
+    start_limitations = False
+    for line in lines:
+        if ""WITHOUT WARRANTIES OR CONDITIONS OF ANY"" in line:
+            start_permissions = True
+            continue
+        if ""limitations"" in line:
+            start_permissions = False
+            start_limitations = True
+            continue
+        if start_permissions and line.strip() and not line.strip().startswith('#'):
+            info[""permissions""].append(line.strip())
+        if start_limitations and line.strip() and not line.strip().startswith('#'):
+            info[""limitations""].append(line.strip())
+    return info
+","core_python","general","advanced","expert_constrained","[""typing"",""authorization"",""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:6265","v1","aaef38ecbd18d5f4668f0f769de74de6b6577ba64650fcbc6c313154cabad7e3"
+"pys_refactor_431e5ed8e15e56","refactor","Refactor the payment processing function to integrate with the helios_telemetry_8443 library for telemetry tracing. The function should wrap a payment operation with telemetry, recording the payment_id as an attribute and recording exceptions without swallowing them.","def process_payment(payment_id, amount):
+    # Simulate payment processing
+    if payment_id % 2 == 0:
+        raise ValueError('Invalid payment ID')
+    return f'Payment {payment_id} processed for {amount}'
+","","The package helios_telemetry_8443 is available. Use the provided API for telemetry tracing.","Package: helios_telemetry_8443
+
+class Telemetry:
+    def trace(self, name: str) -> ContextManager[Span]: ...
+
+class Span:
+    def set_attribute(self, key: str, value: str | int | float | bool) -> None: ...
+    def record_exception(self, exc: BaseException) -> None: ...
+
+Contract:
+- trace is a synchronous context manager
+- exceptions should be recorded and re-raised","import pytest
+from solution import process_payment
+from helios_telemetry_8443 import Telemetry, Span
+
+telemetry = Telemetry()
+
+@pytest.mark.parametrize('payment_id, amount, expected', [
+    (1, 100, 'Payment 1 processed for 100'),
+    (2, 200, 'Invalid payment ID'),
+])
+def test_process_payment(payment_id, amount, expected):
+    with telemetry.trace('process_payment') as span:
+        span.set_attribute('payment_id', payment_id)
+        result = process_payment(payment_id, amount)
+    assert result == expected","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> helios_telemetry_8443
+<NAME> Telemetry
+<NAME> Span
+<END_IMPORT_FROM>
+<ASSIGN>
+<TARGET>
+<NAME_REF> telemetry
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Telemetry
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<FUNCTION>
+<NAME> process_payment
+<PARAM>
+<PARAM_KIND> positional
+<NAME> payment_id
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> amount
+<END_PARAM>
+<BODY>
+<WITH>
+<WITH_ITEM>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> telemetry
+<END_BASE>
+<ATTR_NAME> trace
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""process_payment""
+<END_ARG>
+<END_CALL>
+<AS>
+<NAME_REF> span
+<END_AS>
+<END_WITH_ITEM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> span
+<END_BASE>
+<ATTR_NAME> set_attribute
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""payment_id""
+<END_ARG>
+<ARG>
+<NAME_REF> payment_id
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<TRY>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<BINOP> Mod
+<LEFT>
+<NAME_REF> payment_id
+<END_LEFT>
+<RIGHT>
+<CONST> 2
+<END_RIGHT>
+<END_BINOP>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> 0
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> ValueError
+<END_FUNC>
+<ARG>
+<CONST> ""Invalid payment ID""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<RETURN>
+<PY_EXPR> ""f'Payment {payment_id} processed for {amount}'""
+<END_RETURN>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> Exception
+<END_EXCEPTION_TYPE>
+<NAME> exc
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> span
+<END_BASE>
+<ATTR_NAME> record_exception
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> exc
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<RAISE>
+<NAME_REF> exc
+<END_RAISE>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<END_BODY>
+<END_WITH>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","from helios_telemetry_8443 import Telemetry, Span
+
+telemetry = Telemetry()
+
+def process_payment(payment_id, amount):
+    with telemetry.trace('process_payment') as span:
+        span.set_attribute('payment_id', payment_id)
+        try:
+            # Simulate payment processing
+            if payment_id % 2 == 0:
+                raise ValueError('Invalid payment ID')
+            return f'Payment {payment_id} processed for {amount}'
+        except Exception as exc:
+            span.record_exception(exc)
+            raise exc
+","reliability","new_library_integration","intermediate","detailed","[""context managers"",""exception handling"",""telemetry tracing""]","[""helios_telemetry_8443""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:helios_telemetry_8443:refactor:1","v1","431e5ed8e15e562502f0db1867473cca8997e581fe987c475ed3ba02fa6194e4"
+"pys_generate_a8ba011bb84f6a","generate","I need a Python function to safely increment a shared counter using threading. The function should handle concurrent access without data corruption.","","","(none)","","from solution import safe_increment
+import threading
+
+def test_safe_increment():
+    counter = 0
+    threads = [threading.Thread(target=safe_increment, args=(counter,)) for _ in range(100)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert counter == 100","build","<BUILD>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> threading
+<NAME> Lock
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> SafeCounter
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> value
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CONST> 0
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> lock
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Lock
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> increment
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<WITH>
+<WITH_ITEM>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> lock
+<END_ATTRIBUTE>
+<END_WITH_ITEM>
+<BODY>
+<AUG_ASSIGN>
+<OP> Add
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> value
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CONST> 1
+<END_VALUE>
+<END_AUG_ASSIGN>
+<END_BODY>
+<END_WITH>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<FUNCTION>
+<NAME> safe_increment
+<PARAM>
+<PARAM_KIND> positional
+<NAME> counter
+<TYPE> SafeCounter
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> counter
+<END_BASE>
+<ATTR_NAME> increment
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","from threading import Lock
+
+class SafeCounter:
+    def __init__(self):
+        self.value = 0
+        self.lock = Lock()
+
+    def increment(self):
+        with self.lock:
+            self.value += 1
+
+def safe_increment(counter: SafeCounter):
+    counter.increment()
+","concurrency","race_conditions","beginner","normal","[""threading"",""Lock"",""concurrency"",""race conditions""]","[""threading""]","True","structural","qwen_teacher_synthetic","Qwen/Qwen2.5-Coder-7B-Instruct","teacher:generate:00000000","v1","a8ba011bb84f6a5959fcf26074d76cf4a2791a88ddcaad1913b4e46f08125c1b"
+"pys_refactor_e60b4585744d19","refactor","Create an async authorization helper that validates a bearer token and requires a specified scope before returning the authenticated subject.","import asyncio
+
+async def validate_token(token: str, required_scope: str) -> str:
+    # Placeholder implementation
+    return 'authenticated_user'
+","The code does not use the ember_auth_4986 library and does not perform any actual token validation.","The package `ember_auth_4986` is available. Treat supplied API context as authoritative.","Package: ember_auth_4986
+
+class AuthGateway:
+    def __init__(self, issuer: str, audience: str): ...
+    async def inspect_token(self, token: str) -> Claims: ...
+
+class Claims:
+    subject: str
+    scopes: frozenset[str]
+    expires_at: datetime
+
+class InvalidToken(Exception): ...
+
+Contract:
+- inspect_token performs signature and expiry verification
+- do not decode/trust token payload manually","import pytest
+def test_validate_token_success(solution):
+    token = 'valid_token'
+    required_scope = 'read'
+    result = solution.validate_token(token, required_scope)
+    assert result == 'authenticated_user'
+
+def test_validate_token_invalid_token(solution):
+    token = 'invalid_token'
+    required_scope = 'read'
+    with pytest.raises(InvalidToken):
+        solution.validate_token(token, required_scope)
+
+def test_validate_token_missing_scope(solution):
+    token = 'valid_token'
+    required_scope = 'write'
+    with pytest.raises(ValueError):
+        solution.validate_token(token, required_scope)","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> asyncio
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> ember_auth_4986
+<NAME> AuthGateway
+<NAME> InvalidToken
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> AuthService
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> issuer
+<TYPE> str
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> audience
+<TYPE> str
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> gateway
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> AuthGateway
+<END_FUNC>
+<ARG>
+<NAME_REF> issuer
+<END_ARG>
+<ARG>
+<NAME_REF> audience
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> validate_token
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> token
+<TYPE> str
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> required_scope
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> str
+<BODY>
+<TRY>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> claims
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> gateway
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> inspect_token
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> token
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> required_scope
+<END_LEFT>
+<COMPARE_OP> NotIn
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> claims
+<END_BASE>
+<ATTR_NAME> scopes
+<END_ATTRIBUTE>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> ValueError
+<END_FUNC>
+<ARG>
+<CONST> ""Missing required scope""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<RETURN>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> claims
+<END_BASE>
+<ATTR_NAME> subject
+<END_ATTRIBUTE>
+<END_RETURN>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> InvalidToken
+<END_EXCEPTION_TYPE>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> InvalidToken
+<END_FUNC>
+<ARG>
+<CONST> ""Invalid token""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","import asyncio
+from ember_auth_4986 import AuthGateway, InvalidToken
+
+class AuthService:
+    def __init__(self, issuer: str, audience: str):
+        self.gateway = AuthGateway(issuer, audience)
+
+    async def validate_token(self, token: str, required_scope: str) -> str:
+        try:
+            claims = await self.gateway.inspect_token(token)
+            if required_scope not in claims.scopes:
+                raise ValueError('Missing required scope')
+            return claims.subject
+        except InvalidToken:
+            raise InvalidToken('Invalid token')
+
+# Usage
+# auth_service = AuthService('issuer', 'audience')
+# authenticated_user = await auth_service.validate_token('token', 'required_scope')
+","security","new_library_integration","advanced","normal","[""asyncio"",""exception handling"",""dependency injection"",""JWT validation""]","[""ember_auth_4986""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:ember_auth_4986:refactor:21","v1","e60b4585744d19a67f5dccfcf6919752eb7b192c423b0adab29835847d5744d6"
+"pys_repair_1a4b29fc1b758b","repair","Revert ""Fix openweather unit tests""","# -*- coding: utf-8 -*-
+import bot_mock
+from pyfibot.modules import module_openweather
+from utils import check_re
+
+
+bot = bot_mock.BotMock()
+
+
+def test_weather():
+    regex = u'Lappeenranta, FI: Temperature: \d+.\d\xb0C, feels like: \d+.\d\xb0C, wind: \d+.\d m/s, humidity: \d+%, pressure: \d+ hPa, cloudiness: \d+%'
+    check_re(regex, module_openweather.command_weather(bot, None, ""#channel"", 'lappeenranta')[1])
+
+
+def test_forecast():
+    regex = u'Lappeenranta, Finland: tomorrow: \d+.\d-\d+.\d \xb0C \(.*?\), in 2 days: \d+.\d-\d+.\d \xb0C \(.*?\), in 3 days: \d+.\d-\d+.\d \xb0C \(.*?\)'
+    check_re(regex, module_openweather.command_forecast(bot, None, ""#channel"", 'lappeenranta')[1])
+","","Existing Python file: tests/test_openweather.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> bot_mock
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> pyfibot.modules
+<NAME> module_openweather
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> utils
+<NAME> check_re
+<END_IMPORT_FROM>
+<ASSIGN>
+<TARGET>
+<NAME_REF> bot
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> bot_mock
+<END_BASE>
+<ATTR_NAME> BotMock
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<FUNCTION>
+<NAME> test_weather
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> regex
+<END_TARGET>
+<VALUE>
+<CONST> ""Lappeenranta, FI: Temperature: \\d+.\\d°C, feels like: \\d+.\\d°C, wind: \\d+.\\d m/s, humidity: \\d+%, pressure: \\d+ hPa, cloudiness: \\d+%""
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> check_re
+<END_FUNC>
+<ARG>
+<NAME_REF> regex
+<END_ARG>
+<ARG>
+<SUBSCRIPT>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> module_openweather
+<END_BASE>
+<ATTR_NAME> command_weather
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> bot
+<END_ARG>
+<ARG>
+<CONST> None
+<END_ARG>
+<ARG>
+<CONST> ""#channel""
+<END_ARG>
+<ARG>
+<CONST> ""lappeenranta""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<SLICE>
+<CONST> 1
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> test_forecast
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> regex
+<END_TARGET>
+<VALUE>
+<CONST> ""Lappeenranta, FI: tomorrow: \\d+.\\d-\\d+.\\d °C \\(.*?\\), in 2 days: \\d+.\\d-\\d+.\\d °C \\(.*?\\), in 3 days: \\d+.\\d-\\d+.\\d °C \\(.*?\\)""
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> check_re
+<END_FUNC>
+<ARG>
+<NAME_REF> regex
+<END_ARG>
+<ARG>
+<SUBSCRIPT>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> module_openweather
+<END_BASE>
+<ATTR_NAME> command_forecast
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> bot
+<END_ARG>
+<ARG>
+<CONST> None
+<END_ARG>
+<ARG>
+<CONST> ""#channel""
+<END_ARG>
+<ARG>
+<CONST> ""lappeenranta""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<SLICE>
+<CONST> 1
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","# -*- coding: utf-8 -*-
+import bot_mock
+from pyfibot.modules import module_openweather
+from utils import check_re
+
+
+bot = bot_mock.BotMock()
+
+
+def test_weather():
+    regex = u'Lappeenranta, FI: Temperature: \d+.\d\xb0C, feels like: \d+.\d\xb0C, wind: \d+.\d m/s, humidity: \d+%, pressure: \d+ hPa, cloudiness: \d+%'
+    check_re(regex, module_openweather.command_weather(bot, None, ""#channel"", 'lappeenranta')[1])
+
+
+def test_forecast():
+    regex = u'Lappeenranta, FI: tomorrow: \d+.\d-\d+.\d \xb0C \(.*?\), in 2 days: \d+.\d-\d+.\d \xb0C \(.*?\), in 3 days: \d+.\d-\d+.\d \xb0C \(.*?\)'
+    check_re(regex, module_openweather.command_forecast(bot, None, ""#channel"", 'lappeenranta')[1])
+","core_python","general","intermediate","vague","[]","[""bot_mock"",""pyfibot"",""utils""]","True","structural","public_transformed","bigcode/commitpackft:python","rnyberg/pyfibot,EArmour/pyfibot,aapa/pyfibot,aapa/pyfibot,lepinkainen/pyfibot,rnyberg/pyfibot,lepinkainen/pyfibot,huqa/pyfibot,huqa/pyfibot,EArmour/pyfibot:45fc612fdc5a354dbf0bacccd345b1aebcc73e59:tests/test_openweather.py","v1","1a4b29fc1b758b39115b4d1aface15066b6cd12b7837cd9d7dd887993b99e678"
+"pys_repair_a8a82e5e9ac530","repair","Fix implied_group, it still refers to the old module name","# -*- coding: utf-8 -*-
+##############################################################################
+#
+#    Copyright (C) 2015 Agile Business Group sagl
+#    (<http://www.agilebg.com>)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+
+from openerp.osv import orm, fields
+
+
+class AccountConfigSettings(orm.TransientModel):
+    _inherit = 'account.config.settings'
+
+    _columns = {
+        'group_use_product_description_per_inv_line': fields.boolean(
+            """"""Allow using only the product description on the
+            invoice order lines"""""",
+            implied_group=""invoice_line_description.""
+            ""group_use_product_description_per_inv_line"",
+            help=""""""Allows you to use only product description on the
+            invoice order lines.""""""
+        ),
+    }
+","","Existing Python file: account_invoice_line_description/res_config.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> openerp.osv
+<NAME> orm
+<NAME> fields
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> AccountConfigSettings
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> orm
+<END_BASE>
+<ATTR_NAME> TransientModel
+<END_ATTRIBUTE>
+<END_BASE>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> _inherit
+<END_TARGET>
+<VALUE>
+<CONST> ""account.config.settings""
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> _columns
+<END_TARGET>
+<VALUE>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""group_use_product_description_per_inv_line""
+<END_KEY>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> fields
+<END_BASE>
+<ATTR_NAME> boolean
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""Allow using only the product description on the\n            invoice order lines""
+<END_ARG>
+<KWARG>
+<KW_NAME> implied_group
+<CONST> ""account_invoice_line_description.group_use_product_description_per_inv_line""
+<END_KWARG>
+<KWARG>
+<KW_NAME> help
+<CONST> ""Allows you to use only product description on the\n            invoice order lines.""
+<END_KWARG>
+<END_CALL>
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","# -*- coding: utf-8 -*-
+##############################################################################
+#
+#    Copyright (C) 2015 Agile Business Group sagl
+#    (<http://www.agilebg.com>)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+
+from openerp.osv import orm, fields
+
+
+class AccountConfigSettings(orm.TransientModel):
+    _inherit = 'account.config.settings'
+
+    _columns = {
+        'group_use_product_description_per_inv_line': fields.boolean(
+            """"""Allow using only the product description on the
+            invoice order lines"""""",
+            implied_group=""account_invoice_line_description.""
+            ""group_use_product_description_per_inv_line"",
+            help=""""""Allows you to use only product description on the
+            invoice order lines.""""""
+        ),
+    }
+","core_python","general","intermediate","normal","[""resource_management""]","[""openerp""]","True","structural","public_transformed","bigcode/commitpackft:python","Antiun/account-invoicing,hbrunn/account-invoicing,kittiu/account-invoicing,open-synergy/account-invoicing,raycarnes/account-invoicing,brain-tec/account-invoicing,charbeljc/account-invoicing,Noviat/account-invoicing,Endika/account-invoicing,eezee-it/account-invoicing,brain-tec/account-invoicing,kmee/account-invoicing,gurneyalex/account-invoicing,BT-jmichaud/account-invoicing,iDTLabssl/account-invoicing,kmee/account-invoicing,BT-ojossen/account-invoicing,damdam-s/account-invoicing,sysadminmatmoz/account-invoicing,acsone/account-invoicing,BT-fgarbely/account-invoicing,archetipo/account-invoicing,acsone/account-invoicing,akretion/account-invoicing,Trust-Code/account-invoicing,taktik/account-invoicing,EBII/account-invoicing,bluestar-solutions/account-invoicing,Elneo-group/account-invoicing,scigghia/account-invoicing,sergiocorato/account-invoicing,abstract-open-solutions/account-invoicing:462ae981ed5b9cc9a8f46e97dfe7908c0827ea64:account_invoice_line_description/res_config.py","v1","a8a82e5e9ac5302e2ead453958a3b7f4e4d647139a01bd94dd9d692de20fe7de"
+"pys_generate_269995e3aec591","generate","You are tasked with implementing a buffer management system for a graphics application using OpenGL. The system should allow for efficient modification and flushing of ranges of data within a buffer object, while ensuring that OpenGL can still use other parts of the buffer. 
+
+Your task is to create a class `BufferManager` with the following functionalities:
+1. `map_buffer(range_start, range_end, access_mode)`: A method to map a range of the buffer object for modification. The `range_start` and `range_end` parameters specify the start and end indices of the range to be mapped, and `access_mode` specifies whether the range will be read from, written to, or both.
+2. `flush_range(range_start, range_end)`: A method to explicitly flush a mapped range of the buffer object, indicating that the modifications have been made and OpenGL should not assume the entire range has been modified.
+3. `unmap_buffer()`: A method to unmap the buffer, indicating that the modifications are complete and the buffer can be used by OpenGL.
+
+You should also handle the precise specification of intent with respect to reading, writing, and preservation of previous contents of a mapped range.
+
+Implement the `BufferManager` class with the specified functionalities and ensure that it provides efficient and precise management of buffer ranges for the graphics application.","","","","","","build","<BUILD>
+<MODULE>
+<CLASS>
+<NAME> BufferManager
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> buffer_data
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> buffer_data
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> buffer_data
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CONST> None
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> map_buffer
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> range_start
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> range_end
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> access_mode
+<END_PARAM>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> IsNot
+<CONST> None
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> Exception
+<END_FUNC>
+<ARG>
+<CONST> ""Buffer range already mapped""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<TUPLE>
+<NAME_REF> range_start
+<NAME_REF> range_end
+<NAME_REF> access_mode
+<END_TUPLE>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> flush_range
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> range_start
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> range_end
+<END_PARAM>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> Is
+<CONST> None
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> Exception
+<END_FUNC>
+<ARG>
+<CONST> ""No buffer range mapped""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<IF>
+<CONDITION>
+<BOOL_OP> Or
+<VALUE>
+<COMPARE>
+<LEFT>
+<NAME_REF> range_start
+<END_LEFT>
+<COMPARE_OP> Lt
+<SUBSCRIPT>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_VALUE>
+<SLICE>
+<CONST> 0
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_VALUE>
+<VALUE>
+<COMPARE>
+<LEFT>
+<NAME_REF> range_end
+<END_LEFT>
+<COMPARE_OP> Gt
+<SUBSCRIPT>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_VALUE>
+<SLICE>
+<CONST> 1
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_VALUE>
+<END_BOOL_OP>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> Exception
+<END_FUNC>
+<ARG>
+<CONST> ""Flush range outside mapped range""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> unmap_buffer
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> Is
+<CONST> None
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> Exception
+<END_FUNC>
+<ARG>
+<CONST> ""No buffer range mapped""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> mapped_range
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CONST> None
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","class BufferManager:
+    def __init__(self, buffer_data):
+        self.buffer_data = buffer_data
+        self.mapped_range = None
+
+    def map_buffer(self, range_start, range_end, access_mode):
+        if self.mapped_range is not None:
+            raise Exception(""Buffer range already mapped"")
+
+        # Perform mapping operations, e.g., obtaining a pointer to the range
+        # based on range_start and range_end
+
+        # Set access mode and preserve previous contents based on access_mode
+
+        self.mapped_range = (range_start, range_end, access_mode)
+
+    def flush_range(self, range_start, range_end):
+        if self.mapped_range is None:
+            raise Exception(""No buffer range mapped"")
+
+        if range_start < self.mapped_range[0] or range_end > self.mapped_range[1]:
+            raise Exception(""Flush range outside mapped range"")
+
+        # Perform flushing operations for the specified range
+
+    def unmap_buffer(self):
+        if self.mapped_range is None:
+            raise Exception(""No buffer range mapped"")
+
+        # Perform unmapping operations, e.g., releasing the mapped range
+
+        self.mapped_range = None
+","core_python","general","advanced","expert_constrained","[""error_handling"",""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:26436","v1","269995e3aec591effe6271403310d118faa634fc9b300737ba8d98d7bcaab6cb"
+"pys_repair_2cfe1eeca48b67","repair","Fix image path in manifest","# -*- coding: utf-8 -*-
+# © 2013-2016 Numérigraphe SARL
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+{
+    ""name"": ""Hierarchical Inventory adjustments"",
+    ""summary"": ""Group several Inventory adjustments in a master inventory"",
+    ""version"": ""8.0.2.0.0"",
+    ""depends"": [""stock""],
+    ""author"": u""Numérigraphe,Odoo Community Association (OCA)"",
+    ""category"": ""Warehouse Management"",
+    ""data"": [""views/stock_inventory_view.xml"",
+             ""wizard/generate_inventory_view.xml""],
+    ""images"": [""inventory_form.png"",
+               ""inventory_form_actions.png"",
+               ""wizard.png""],
+    'license': 'AGPL-3',
+    'installable': True
+}
+","","Existing Python file: stock_inventory_hierarchical/__openerp__.py","","","edit","<EDIT>
+<MODULE>
+<EXPR_STMT>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""name""
+<END_KEY>
+<VALUE>
+<CONST> ""Hierarchical Inventory adjustments""
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""summary""
+<END_KEY>
+<VALUE>
+<CONST> ""Group several Inventory adjustments in a master inventory""
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""version""
+<END_KEY>
+<VALUE>
+<CONST> ""8.0.2.0.0""
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""depends""
+<END_KEY>
+<VALUE>
+<LIST>
+<CONST> ""stock""
+<END_LIST>
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""author""
+<END_KEY>
+<VALUE>
+<CONST> ""Numérigraphe,Odoo Community Association (OCA)""
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""category""
+<END_KEY>
+<VALUE>
+<CONST> ""Warehouse Management""
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""data""
+<END_KEY>
+<VALUE>
+<LIST>
+<CONST> ""views/stock_inventory_view.xml""
+<CONST> ""wizard/generate_inventory_view.xml""
+<END_LIST>
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""images""
+<END_KEY>
+<VALUE>
+<LIST>
+<CONST> ""images/inventory_form.png""
+<CONST> ""images/inventory_form_actions.png""
+<CONST> ""images/wizard.png""
+<END_LIST>
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""license""
+<END_KEY>
+<VALUE>
+<CONST> ""AGPL-3""
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""installable""
+<END_KEY>
+<VALUE>
+<CONST> True
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_EXPR_STMT>
+<END_MODULE>
+<END>","# -*- coding: utf-8 -*-
+# © 2013-2016 Numérigraphe SARL
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+{
+    ""name"": ""Hierarchical Inventory adjustments"",
+    ""summary"": ""Group several Inventory adjustments in a master inventory"",
+    ""version"": ""8.0.2.0.0"",
+    ""depends"": [""stock""],
+    ""author"": u""Numérigraphe,Odoo Community Association (OCA)"",
+    ""category"": ""Warehouse Management"",
+    ""data"": [""views/stock_inventory_view.xml"",
+             ""wizard/generate_inventory_view.xml""],
+    ""images"": [""images/inventory_form.png"",
+               ""images/inventory_form_actions.png"",
+               ""images/wizard.png""],
+    'license': 'AGPL-3',
+    'installable': True
+}
+","core_python","general","intermediate","vague","[]","[]","True","structural","public_transformed","bigcode/commitpackft:python","kmee/stock-logistics-warehouse,factorlibre/stock-logistics-warehouse,open-synergy/stock-logistics-warehouse,acsone/stock-logistics-warehouse,avoinsystems/stock-logistics-warehouse:c3f8860c717a139d396b0d902db989ab7b8369ba:stock_inventory_hierarchical/__openerp__.py","v1","2cfe1eeca48b6754f4a515fd5a3c03d9b0c8418b2bdd49c342b075c9781d218b"
+"pys_generate_73b865d0502c2f","generate","I'm working on a web application that needs to interact with multiple external services such as a database, a payment gateway, and a notification service. I want to use dependency injection to make my application more modular and testable. Can you provide an example of how to set up dependency injection in a Python web application using a popular library?","","","A web application that interacts with multiple external services.","","import pytest
+from solution import create_app, DatabaseService, PaymentGateway, NotificationService
+
+@pytest.fixture
+def app():
+    return create_app()
+
+def test_database_service(app):
+    db_service = app.config['db_service']
+    assert isinstance(db_service, DatabaseService)
+
+def test_payment_gateway(app):
+    payment_gateway = app.config['payment_gateway']
+    assert isinstance(payment_gateway, PaymentGateway)
+
+def test_notification_service(app):
+    notification_service = app.config['notification_service']
+    assert isinstance(notification_service, NotificationService)","build","<BUILD>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> flask
+<NAME> Flask
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> typing
+<NAME> Dict
+<NAME> Any
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> DatabaseService
+<BODY>
+<FUNCTION>
+<NAME> connect
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<CONST> ""Connecting to database""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<CLASS>
+<NAME> PaymentGateway
+<BODY>
+<FUNCTION>
+<NAME> process_payment
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> amount
+<TYPE> float
+<END_PARAM>
+<RETURN_TYPE> bool
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<PY_EXPR> ""f'Processing payment of ${amount}'""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<RETURN>
+<CONST> True
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<CLASS>
+<NAME> NotificationService
+<BODY>
+<FUNCTION>
+<NAME> send_notification
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> message
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> None
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<PY_EXPR> ""f'Sending notification: {message}'""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<FUNCTION>
+<NAME> create_app
+<RETURN_TYPE> Flask
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> app
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Flask
+<END_FUNC>
+<ARG>
+<NAME_REF> __name__
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> app
+<END_BASE>
+<ATTR_NAME> config
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> update
+<END_ATTRIBUTE>
+<END_FUNC>
+<KWARG>
+<KW_NAME> db_service
+<CALL>
+<FUNC>
+<NAME_REF> DatabaseService
+<END_FUNC>
+<END_CALL>
+<END_KWARG>
+<KWARG>
+<KW_NAME> payment_gateway
+<CALL>
+<FUNC>
+<NAME_REF> PaymentGateway
+<END_FUNC>
+<END_CALL>
+<END_KWARG>
+<KWARG>
+<KW_NAME> notification_service
+<CALL>
+<FUNC>
+<NAME_REF> NotificationService
+<END_FUNC>
+<END_CALL>
+<END_KWARG>
+<END_CALL>
+<END_EXPR_STMT>
+<RETURN>
+<NAME_REF> app
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","from flask import Flask
+from typing import Dict, Any
+
+class DatabaseService:
+    def connect(self):
+        print('Connecting to database')
+
+class PaymentGateway:
+    def process_payment(self, amount: float) -> bool:
+        print(f'Processing payment of ${amount}')
+        return True
+
+class NotificationService:
+    def send_notification(self, message: str) -> None:
+        print(f'Sending notification: {message}')
+
+def create_app() -> Flask:
+    app = Flask(__name__)
+    app.config.update(
+        db_service=DatabaseService(),
+        payment_gateway=PaymentGateway(),
+        notification_service=NotificationService()
+    )
+    return app
+","software_design","dependency_injection","intermediate","normal","[""Dependency Injection"",""Flask"",""Type Hinting""]","[""Flask""]","True","structural","qwen_teacher_synthetic","Qwen/Qwen2.5-Coder-7B-Instruct","teacher:generate:00000001","v1","73b865d0502c2f043667a64d6997123ff15423716e50d5fed7dfddb254ba5eb4"
+"pys_refactor_b2b8021285c222","refactor","Refactor the following SQLAlchemy query to improve readability and maintainability.","from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    age = Column(Integer)
+
+engine = create_engine('sqlite:///example.db')
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Query to find all users older than 20
+result = session.query(User).filter(User.age > 20).all()
+print(result)
+","","","","import pytest
+from solution import session, User
+
+@pytest.fixture(autouse=True)
+def setup_database():
+    # Setup the database and insert some data
+    session.add_all([
+        User(name='Alice', age=25),
+        User(name='Bob', age=18),
+        User(name='Charlie', age=30)
+    ])
+    session.commit()
+    yield
+    # Clean up the database
+    session.query(User).delete()
+    session.commit()
+
+def test_find_users_older_than_20():
+    result = session.query(User).filter(User.age > 20).all()
+    assert len(result) == 2
+    assert result[0].name == 'Alice'
+    assert result[1].name == 'Charlie'","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> sqlalchemy.orm
+<NAME> sessionmaker
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> sqlalchemy
+<NAME> create_engine
+<NAME> Column
+<NAME> Integer
+<NAME> String
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> sqlalchemy.ext.declarative
+<NAME> declarative_base
+<END_IMPORT_FROM>
+<ASSIGN>
+<TARGET>
+<NAME_REF> Base
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> declarative_base
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<CLASS>
+<NAME> User
+<BASE>
+<NAME_REF> Base
+<END_BASE>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> __tablename__
+<END_TARGET>
+<VALUE>
+<CONST> ""users""
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> id
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Column
+<END_FUNC>
+<ARG>
+<NAME_REF> Integer
+<END_ARG>
+<KWARG>
+<KW_NAME> primary_key
+<CONST> True
+<END_KWARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> name
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Column
+<END_FUNC>
+<ARG>
+<NAME_REF> String
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> age
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Column
+<END_FUNC>
+<ARG>
+<NAME_REF> Integer
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_CLASS>
+<ASSIGN>
+<TARGET>
+<NAME_REF> engine
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> create_engine
+<END_FUNC>
+<ARG>
+<CONST> ""sqlite:///example.db""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> Session
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> sessionmaker
+<END_FUNC>
+<KWARG>
+<KW_NAME> bind
+<NAME_REF> engine
+<END_KWARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> session
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Session
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> users_over_20
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> session
+<END_BASE>
+<ATTR_NAME> query
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> User
+<END_ARG>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> filter
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> User
+<END_BASE>
+<ATTR_NAME> age
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> Gt
+<CONST> 20
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_ARG>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> all
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<NAME_REF> users_over_20
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_MODULE>
+<END>","from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    age = Column(Integer)
+
+engine = create_engine('sqlite:///example.db')
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Refactored query to find all users older than 20
+users_over_20 = session.query(User).filter(User.age > 20).all()
+print(users_over_20)
+","database","sqlalchemy","intermediate","normal","[""SQLAlchemy"",""Query Refactoring"",""Readability"",""Maintainability""]","[""sqlalchemy""]","True","structural","qwen_teacher_synthetic","Qwen/Qwen2.5-Coder-7B-Instruct","teacher:refactor:00000000","v1","b2b8021285c2228256c7a56f36b52367094ccd2209ebf02e7c4f495e38950a01"
+"pys_generate_1291737096eead","generate","You are tasked with implementing a simple Python function that takes a list of strings as input and returns a new list containing only the strings that are palindromes. A palindrome is a word, phrase, number, or other sequence of characters that reads the same forward and backward (ignoring spaces, punctuation, and capitalization).
+
+You are provided with the following code snippet as a starting point:
+
+```python
+def find_palindromes(words):
+    # Your code here
+    return palindromes
+```
+
+Your task is to complete the `find_palindromes` function to filter out the palindromes from the input list of strings and return a new list containing only the palindromes.
+
+For example, if the input list is `[""radar"", ""hello"", ""level"", ""world"", ""Anna""]`, the function should return `[""radar"", ""level"", ""Anna""]`.","","","","","","build","<BUILD>
+<MODULE>
+<FUNCTION>
+<NAME> find_palindromes
+<PARAM>
+<PARAM_KIND> positional
+<NAME> words
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> palindromes
+<END_TARGET>
+<VALUE>
+<PY_EXPR> ""[word for word in words if word.lower().replace(' ', '') == word[::-1].lower().replace(' ', '')]""
+<END_VALUE>
+<END_ASSIGN>
+<RETURN>
+<NAME_REF> palindromes
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","def find_palindromes(words):
+    palindromes = [word for word in words if word.lower().replace("" "", """") == word[::-1].lower().replace("" "", """")]
+    return palindromes
+","core_python","general","intermediate","expert_constrained","[""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:131094","v1","1291737096eead756c8d0d8629cd4a19559d7e575218dac1725221968a05a298"
+"pys_full_file_generate_fa68f6ca31d76b","full_file_generate","Implement a function to fetch data from a remote API with built-in retry logic. The function should handle common network errors and retry up to 3 times before giving up.","","","","","import pytest
+from solution import fetch_data_with_retries
+
+@pytest.mark.parametrize('url, expected', [
+    ('https://api.example.com/data', {'key': 'value'}),
+    ('https://api.example.com/error', None),
+])
+def test_fetch_data_with_retries(url, expected):
+    result = fetch_data_with_retries(url)
+    assert result == expected
+
+def test_fetch_data_with_retries_failure():
+    with pytest.raises(TooManyRetries):
+        fetch_data_with_retries('https://api.example.com/always_fail')","build","<BUILD>
+<MODULE>
+<IMPORT>
+<NAME> requests
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> requests.adapters
+<NAME> HTTPAdapter
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> requests.exceptions
+<NAME> RequestException
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> urllib3.util.retry
+<NAME> Retry
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> TooManyRetries
+<BASE>
+<NAME_REF> Exception
+<END_BASE>
+<BODY>
+<PASS>
+<END_BODY>
+<END_CLASS>
+<FUNCTION>
+<NAME> fetch_data_with_retries
+<PARAM>
+<PARAM_KIND> positional
+<NAME> url
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> retries
+<DEFAULT>
+<CONST> 3
+<END_DEFAULT>
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> session
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> requests
+<END_BASE>
+<ATTR_NAME> Session
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> retries
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Retry
+<END_FUNC>
+<KWARG>
+<KW_NAME> total
+<NAME_REF> retries
+<END_KWARG>
+<KWARG>
+<KW_NAME> backoff_factor
+<CONST> 1
+<END_KWARG>
+<KWARG>
+<KW_NAME> status_forcelist
+<LIST>
+<CONST> 500
+<CONST> 502
+<CONST> 503
+<CONST> 504
+<END_LIST>
+<END_KWARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> session
+<END_BASE>
+<ATTR_NAME> mount
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""http://""
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> HTTPAdapter
+<END_FUNC>
+<KWARG>
+<KW_NAME> max_retries
+<NAME_REF> retries
+<END_KWARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> session
+<END_BASE>
+<ATTR_NAME> mount
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""https://""
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> HTTPAdapter
+<END_FUNC>
+<KWARG>
+<KW_NAME> max_retries
+<NAME_REF> retries
+<END_KWARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<TRY>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> response
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> session
+<END_BASE>
+<ATTR_NAME> get
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> url
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> response
+<END_BASE>
+<ATTR_NAME> raise_for_status
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_EXPR_STMT>
+<RETURN>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> response
+<END_BASE>
+<ATTR_NAME> json
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_RETURN>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> RequestException
+<END_EXCEPTION_TYPE>
+<NAME> e
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> TooManyRetries
+<END_FUNC>
+<ARG>
+<PY_EXPR> ""f'Failed after {retries} retries: {e}'""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","import requests
+from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
+from urllib3.util.retry import Retry
+
+class TooManyRetries(Exception):
+    pass
+
+def fetch_data_with_retries(url, retries=3):
+    session = requests.Session()
+    retries = Retry(total=retries, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    session.mount('http://', HTTPAdapter(max_retries=retries))
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+
+    try:
+        response = session.get(url)
+        response.raise_for_status()
+        return response.json()
+    except RequestException as e:
+        raise TooManyRetries(f'Failed after {retries} retries: {e}')
+","networking","retries","intermediate","normal","[""HTTP requests"",""retry logic"",""exception handling""]","[""requests"",""urllib3""]","True","structural","qwen_teacher_synthetic","Qwen/Qwen2.5-Coder-7B-Instruct","teacher:full_file_generate:00000000","v1","fa68f6ca31d76b293a1fe22fcba12dd403cd080405fe772925892f9005d89999"
+"pys_refactor_98dbfe79c64b94","refactor","Create an async repository-like component that caches serialized user records for 60 seconds and falls back to a supplied async loader on misses.","import asyncio
+
+async def load_user_record(user_id: int) -> bytes:
+    # Simulate a slow database query
+    await asyncio.sleep(1)
+    return f'User record for {user_id}'.encode('utf-8')
+
+async def fetch_user_record(user_id: int) -> bytes:
+    # This function should cache user records for 60 seconds
+    pass
+","The fetch_user_record function is incomplete and does not implement caching.","The package `aero_cache_8665` is available. Treat supplied API context as authoritative.","Package: aero_cache_8665
+
+class CacheClient:
+    def __init__(self, endpoint: str): ...
+    async def lookup(self, key: str) -> bytes | None: ...
+    async def store_value(self, key: str, value: bytes, ttl_seconds: int) -> None: ...
+    async def close(self) -> None: ...
+
+Contract:
+- methods are asynchronous
+- ttl_seconds must be positive
+- close owned clients","import pytest
+from solution import Fetcher
+
+@pytest.mark.asyncio
+async def test_fetcher_misses_and_hits():
+    fetcher = Fetcher(load_user_record)
+    # First call should miss cache and hit the loader
+    result1 = await fetcher.get_user_record(1)
+    assert result1 == b'User record for 1'
+    # Second call should hit cache
+    result2 = await fetcher.get_user_record(1)
+    assert result2 == b'User record for 1'
+    assert result1 == result2
+
+@pytest.mark.asyncio
+async def test_fetcher_with_different_keys():
+    fetcher = Fetcher(load_user_record)
+    result1 = await fetcher.get_user_record(1)
+    result2 = await fetcher.get_user_record(2)
+    assert result1 != result2","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> asyncio
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> aero_cache_8665
+<NAME> CacheClient
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> Fetcher
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> loader
+<TYPE> callable
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> loader
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache_client
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> CacheClient
+<END_FUNC>
+<ARG>
+<CONST> ""http://localhost:8080""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<DICT>
+<END_DICT>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> get_user_record
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> user_id
+<TYPE> int
+<END_PARAM>
+<RETURN_TYPE> bytes
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> key
+<END_TARGET>
+<VALUE>
+<PY_EXPR> ""f'user_record_{user_id}'""
+<END_VALUE>
+<END_ASSIGN>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> key
+<END_LEFT>
+<COMPARE_OP> In
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RETURN>
+<SUBSCRIPT>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_VALUE>
+<SLICE>
+<NAME_REF> key
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_RETURN>
+<END_BODY>
+<ELSE>
+<ASSIGN>
+<TARGET>
+<NAME_REF> value
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<SUBSCRIPT>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_VALUE>
+<SLICE>
+<NAME_REF> key
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_TARGET>
+<VALUE>
+<NAME_REF> value
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache_client
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> store_value
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> key
+<END_ARG>
+<ARG>
+<NAME_REF> value
+<END_ARG>
+<ARG>
+<CONST> 60
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<RETURN>
+<NAME_REF> value
+<END_RETURN>
+<END_ELSE>
+<END_IF>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> close
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<RETURN_TYPE> None
+<BODY>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache_client
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> close
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","import asyncio
+from aero_cache_8665 import CacheClient
+
+class Fetcher:
+    def __init__(self, loader: callable):
+        self.loader = loader
+        self.cache_client = CacheClient('http://localhost:8080')
+        self.cache = {}
+
+    async def get_user_record(self, user_id: int) -> bytes:
+        key = f'user_record_{user_id}'
+        if key in self.cache:
+            return self.cache[key]
+        else:
+            value = await self.loader(user_id)
+            self.cache[key] = value
+            await self.cache_client.store_value(key, value, 60)
+            return value
+
+    async def close(self) -> None:
+        await self.cache_client.close()
+","software_design","new_library_integration","advanced","expert_constrained","[""asynchronous programming"",""caching"",""repository pattern"",""asyncio"",""aero_cache_8665""]","[""aero_cache_8665""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:aero_cache_8665:refactor:8","v1","98dbfe79c64b94bddc2669b49f6720f12e1505cba82e9d67edbb705df977b531"
+"pys_repair_2dc0e3308faed7","repair","I have a simple asyncio application that reads from a slow API and writes to a fast database. The application is experiencing backpressure issues because the database write operation is too fast and can't keep up with the rate of data being read from the API.","import asyncio
+
+async def fetch_data(session, url):
+    async with session.get(url) as response:
+        return await response.json()
+
+async def write_to_db(data):
+    # Simulate a fast database write operation
+    await asyncio.sleep(0.1)
+
+async def main():
+    url = 'https://api.example.com/data'
+    async with aiohttp.ClientSession() as session:
+        while True:
+            data = await fetch_data(session, url)
+            await write_to_db(data)
+
+if __name__ == '__main__':
+    asyncio.run(main())
+","The application is experiencing backpressure because the database write operation is too fast and can't keep up with the rate of data being read from the API.","The application is a simple asyncio script that reads data from a slow API and writes it to a fast database. The goal is to ensure that the application handles backpressure correctly.","","import pytest
+from solution import main
+
+@pytest.mark.asyncio
+async def test_backpressure():
+    # This test should simulate the backpressure issue and verify that the application handles it correctly.
+    pass","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> asyncio
+<END_IMPORT>
+<IMPORT>
+<NAME> aiohttp
+<END_IMPORT>
+<ASYNC_FUNCTION>
+<NAME> fetch_data
+<PARAM>
+<PARAM_KIND> positional
+<NAME> session
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> url
+<END_PARAM>
+<BODY>
+<ASYNC_WITH>
+<WITH_ITEM>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> session
+<END_BASE>
+<ATTR_NAME> get
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> url
+<END_ARG>
+<END_CALL>
+<AS>
+<NAME_REF> response
+<END_AS>
+<END_WITH_ITEM>
+<BODY>
+<RETURN>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> response
+<END_BASE>
+<ATTR_NAME> json
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_AWAIT>
+<END_RETURN>
+<END_BODY>
+<END_ASYNC_WITH>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> write_to_db
+<PARAM>
+<PARAM_KIND> positional
+<NAME> data
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> asyncio
+<END_BASE>
+<ATTR_NAME> sleep
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> 0.1
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> main
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> url
+<END_TARGET>
+<VALUE>
+<CONST> ""https://api.example.com/data""
+<END_VALUE>
+<END_ASSIGN>
+<ASYNC_WITH>
+<WITH_ITEM>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> aiohttp
+<END_BASE>
+<ATTR_NAME> ClientSession
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<AS>
+<NAME_REF> session
+<END_AS>
+<END_WITH_ITEM>
+<BODY>
+<WHILE>
+<CONDITION>
+<CONST> True
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> data
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<NAME_REF> fetch_data
+<END_FUNC>
+<ARG>
+<NAME_REF> session
+<END_ARG>
+<ARG>
+<NAME_REF> url
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<NAME_REF> write_to_db
+<END_FUNC>
+<ARG>
+<NAME_REF> data
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_WHILE>
+<END_BODY>
+<END_ASYNC_WITH>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> __name__
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""__main__""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> asyncio
+<END_BASE>
+<ATTR_NAME> run
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> main
+<END_FUNC>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<END_MODULE>
+<END>","import asyncio
+import aiohttp
+
+async def fetch_data(session, url):
+    async with session.get(url) as response:
+        return await response.json()
+
+async def write_to_db(data):
+    # Simulate a fast database write operation
+    await asyncio.sleep(0.1)
+
+async def main():
+    url = 'https://api.example.com/data'
+    async with aiohttp.ClientSession() as session:
+        while True:
+            data = await fetch_data(session, url)
+            await write_to_db(data)
+
+if __name__ == '__main__':
+    asyncio.run(main())
+","asyncio","backpressure","beginner","normal","[""asyncio"",""backpressure"",""aiohttp""]","[""aiohttp""]","True","structural","qwen_teacher_synthetic","Qwen/Qwen2.5-Coder-7B-Instruct","teacher:repair:00000000","v1","2dc0e3308faed7711c1fc239651c0d065011d6f1538d37b6ade492cc0f7c176c"
+"pys_generate_d9f070f9c862bf","generate","Create an async artifact repository that stores JSON documents as UTF-8 bytes and retrieves and decodes them. Use the quanta_storage_4880 library.","","","The package `quanta_storage_4880` is available. Treat supplied API context as authoritative.","Package: quanta_storage_4880
+
+class BlobClient:
+    async def store_blob(self, bucket: str, key: str, data: bytes) -> None: ...
+    async def read_blob(self, bucket: str, key: str) -> bytes: ...
+    async def exists(self, bucket: str, key: str) -> bool: ...
+
+Contract:
+- bucket and key are separate arguments
+- all operations are asynchronous","import solution
+
+async def test_store_and_retrieve_json():
+    client = solution.ArtifactRepository('test-bucket')
+    doc = {'key': 'value'}
+    await client.store_json('my-document', doc)
+    retrieved_doc = await client.retrieve_json('my-document')
+    assert retrieved_doc == doc
+
+async def test_non_existent_document():
+    client = solution.ArtifactRepository('test-bucket')
+    try:
+        await client.retrieve_json('non-existent-document')
+        assert False, 'Expected FileNotFoundError'
+    except FileNotFoundError:
+        pass","build","<BUILD>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> quanta_storage_4880
+<NAME> BlobClient
+<END_IMPORT_FROM>
+<IMPORT>
+<NAME> json
+<END_IMPORT>
+<CLASS>
+<NAME> ArtifactRepository
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> bucket
+<TYPE> str
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> blob_client
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> BlobClient
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> bucket
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> bucket
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> store_json
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> key
+<TYPE> str
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> doc
+<TYPE> dict
+<END_PARAM>
+<RETURN_TYPE> None
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> json_bytes
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> json
+<END_BASE>
+<ATTR_NAME> dumps
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> doc
+<END_ARG>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> encode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""utf-8""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> blob_client
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> store_blob
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> bucket
+<END_ATTRIBUTE>
+<END_ARG>
+<ARG>
+<NAME_REF> key
+<END_ARG>
+<ARG>
+<NAME_REF> json_bytes
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> retrieve_json
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> key
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> dict
+<BODY>
+<IF>
+<CONDITION>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> blob_client
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> exists
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> bucket
+<END_ATTRIBUTE>
+<END_ARG>
+<ARG>
+<NAME_REF> key
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> json_bytes
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> blob_client
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> read_blob
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> bucket
+<END_ATTRIBUTE>
+<END_ARG>
+<ARG>
+<NAME_REF> key
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<RETURN>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> json
+<END_BASE>
+<ATTR_NAME> loads
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> json_bytes
+<END_BASE>
+<ATTR_NAME> decode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""utf-8""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_RETURN>
+<END_BODY>
+<ELSE>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> FileNotFoundError
+<END_FUNC>
+<ARG>
+<PY_EXPR> ""f'Document not found: {key}'""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_ELSE>
+<END_IF>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","from quanta_storage_4880 import BlobClient
+import json
+
+class ArtifactRepository:
+    def __init__(self, bucket: str):
+        self.blob_client = BlobClient()
+        self.bucket = bucket
+
+    async def store_json(self, key: str, doc: dict) -> None:
+        json_bytes = json.dumps(doc).encode('utf-8')
+        await self.blob_client.store_blob(self.bucket, key, json_bytes)
+
+    async def retrieve_json(self, key: str) -> dict:
+        if await self.blob_client.exists(self.bucket, key):
+            json_bytes = await self.blob_client.read_blob(self.bucket, key)
+            return json.loads(json_bytes.decode('utf-8'))
+        else:
+            raise FileNotFoundError(f'Document not found: {key}')
+","data_engineering","new_library_integration","advanced","expert_constrained","[""asyncio"",""JSON serialization"",""error handling"",""concurrency"",""API integration""]","[""quanta_storage_4880""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:quanta_storage_4880:generate:3","v1","d9f070f9c862bf6c381b961aa0abcbedbbc930b20cfe4e9d76da5414ade2d162"
+"pys_repair_0f8520c1392684","repair","Wrap a payment operation with telemetry. Record payment_id as an attribute, record exceptions, and never swallow the original error.","from aero_telemetry_2673 import Tracer
+
+def process_payment(payment_id, amount):
+    tracer = Tracer()
+    with tracer.start_span('process_payment') as span:
+        span.set_attribute('payment_id', payment_id)
+        # Simulate payment processing
+        if amount < 0:
+            raise ValueError('Negative amount not allowed')
+        print(f'Processed payment {payment_id} for {amount}')
+","","The package `aero_telemetry_2673` is available. Treat supplied API context as authoritative.","Package: aero_telemetry_2673
+
+class Tracer:
+    def start_span(self, name: str) -> ContextManager[Span]: ...
+
+class Span:
+    def set_attribute(self, key: str, value: str | int | float | bool) -> None: ...
+    def record_exception(self, exc: BaseException) -> None: ...
+
+Contract:
+- start_span is a synchronous context manager
+- exceptions should be recorded and re-raised","import pytest
+from solution import process_payment
+
+@pytest.mark.parametrize('payment_id, amount, expected', [
+    ('12345', 100, 'Processed payment 12345 for 100'),
+    ('67890', -50, 'Negative amount not allowed'),
+])
+def test_process_payment(payment_id, amount, expected):
+    with pytest.raises(ValueError) as exc_info:
+        process_payment(payment_id, amount)
+    assert str(exc_info.value) == expected","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> aero_telemetry_2673
+<NAME> Tracer
+<END_IMPORT_FROM>
+<FUNCTION>
+<NAME> process_payment
+<PARAM>
+<PARAM_KIND> positional
+<NAME> payment_id
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> amount
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> tracer
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Tracer
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<WITH>
+<WITH_ITEM>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> tracer
+<END_BASE>
+<ATTR_NAME> start_span
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""process_payment""
+<END_ARG>
+<END_CALL>
+<AS>
+<NAME_REF> span
+<END_AS>
+<END_WITH_ITEM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> span
+<END_BASE>
+<ATTR_NAME> set_attribute
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""payment_id""
+<END_ARG>
+<ARG>
+<NAME_REF> payment_id
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<TRY>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> amount
+<END_LEFT>
+<COMPARE_OP> Lt
+<CONST> 0
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> ValueError
+<END_FUNC>
+<ARG>
+<CONST> ""Negative amount not allowed""
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_IF>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<PY_EXPR> ""f'Processed payment {payment_id} for {amount}'""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> Exception
+<END_EXCEPTION_TYPE>
+<NAME> e
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> span
+<END_BASE>
+<ATTR_NAME> record_exception
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> e
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<RAISE>
+<NAME_REF> e
+<END_RAISE>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<END_BODY>
+<END_WITH>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","from aero_telemetry_2673 import Tracer
+
+def process_payment(payment_id, amount):
+    tracer = Tracer()
+    with tracer.start_span('process_payment') as span:
+        span.set_attribute('payment_id', payment_id)
+        try:
+            # Simulate payment processing
+            if amount < 0:
+                raise ValueError('Negative amount not allowed')
+            print(f'Processed payment {payment_id} for {amount}')
+        except Exception as e:
+            span.record_exception(e)
+            raise e
+","reliability","new_library_integration","advanced","normal","[""context managers"",""exception handling"",""logging""]","[""aero_telemetry_2673""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:aero_telemetry_2673:repair:15","v1","0f8520c1392684bab5c2e3609f70f79804ce7663959f9407df47924f5da13fbc"
+"pys_repair_c35c9c13b2c49e","repair","Make debugger record a debug message instead of error when importing validate_email in partner_email_check","# Copyright 2019 Komit <https://komit-consulting.com>
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+
+import logging
+from odoo import api, models, _
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
+
+try:
+    from validate_email import validate_email
+except ImportError:
+    _logger.error('Cannot import ""validate_email"".')
+
+    def validate_email(email):
+        _logger.warning(
+            'Can not validate email, '
+            'python dependency required ""validate_email""')
+        return True
+
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    @api.constrains('email')
+    def constrains_email(self):
+        for rec in self.filtered(""email""):
+            self.email_check(rec.email)
+
+    @api.model
+    def email_check(self, email):
+        if validate_email(email):
+            return True
+        raise UserError(_('Invalid e-mail!'))
+","","Existing Python file: partner_email_check/models/res_partner.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> logging
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> odoo
+<NAME> api
+<NAME> models
+<NAME> _
+<END_IMPORT_FROM>
+<IMPORT_FROM>
+<MODULE_NAME> odoo.exceptions
+<NAME> UserError
+<END_IMPORT_FROM>
+<ASSIGN>
+<TARGET>
+<NAME_REF> _logger
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> logging
+<END_BASE>
+<ATTR_NAME> getLogger
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> __name__
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<TRY>
+<BODY>
+<IMPORT_FROM>
+<MODULE_NAME> validate_email
+<NAME> validate_email
+<END_IMPORT_FROM>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> ImportError
+<END_EXCEPTION_TYPE>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> _logger
+<END_BASE>
+<ATTR_NAME> debug
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""Cannot import \""validate_email\"".""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<FUNCTION>
+<NAME> validate_email
+<PARAM>
+<PARAM_KIND> positional
+<NAME> email
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> _logger
+<END_BASE>
+<ATTR_NAME> warning
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""Can not validate email, python dependency required \""validate_email\""""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<RETURN>
+<CONST> True
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<CLASS>
+<NAME> ResPartner
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> models
+<END_BASE>
+<ATTR_NAME> Model
+<END_ATTRIBUTE>
+<END_BASE>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> _inherit
+<END_TARGET>
+<VALUE>
+<CONST> ""res.partner""
+<END_VALUE>
+<END_ASSIGN>
+<FUNCTION>
+<NAME> constrains_email
+<DECORATOR>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> api
+<END_BASE>
+<ATTR_NAME> constrains
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""email""
+<END_ARG>
+<END_CALL>
+<END_DECORATOR>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<FOR>
+<TARGET>
+<NAME_REF> rec
+<END_TARGET>
+<ITER>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> filtered
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""email""
+<END_ARG>
+<END_CALL>
+<END_ITER>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> email_check
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> rec
+<END_BASE>
+<ATTR_NAME> email
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FOR>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> email_check
+<DECORATOR>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> api
+<END_BASE>
+<ATTR_NAME> model
+<END_ATTRIBUTE>
+<END_DECORATOR>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> email
+<END_PARAM>
+<BODY>
+<IF>
+<CONDITION>
+<CALL>
+<FUNC>
+<NAME_REF> validate_email
+<END_FUNC>
+<ARG>
+<NAME_REF> email
+<END_ARG>
+<END_CALL>
+<END_CONDITION>
+<BODY>
+<RETURN>
+<CONST> True
+<END_RETURN>
+<END_BODY>
+<END_IF>
+<RAISE>
+<CALL>
+<FUNC>
+<NAME_REF> UserError
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> _
+<END_FUNC>
+<ARG>
+<CONST> ""Invalid e-mail!""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_RAISE>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","# Copyright 2019 Komit <https://komit-consulting.com>
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+
+import logging
+from odoo import api, models, _
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
+
+try:
+    from validate_email import validate_email
+except ImportError:
+    _logger.debug('Cannot import ""validate_email"".')
+
+    def validate_email(email):
+        _logger.warning(
+            'Can not validate email, '
+            'python dependency required ""validate_email""')
+        return True
+
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    @api.constrains('email')
+    def constrains_email(self):
+        for rec in self.filtered(""email""):
+            self.email_check(rec.email)
+
+    @api.model
+    def email_check(self, email):
+        if validate_email(email):
+            return True
+        raise UserError(_('Invalid e-mail!'))
+","core_python","general","advanced","normal","[""security"",""error_handling""]","[""odoo"",""validate_email""]","True","structural","public_transformed","bigcode/commitpackft:python","BT-rmartin/partner-contact,OCA/partner-contact,OCA/partner-contact,BT-rmartin/partner-contact:9e169348d95e29ad04942ecb00628f3d1f3a3a1c:partner_email_check/models/res_partner.py","v1","c35c9c13b2c49e1826cb57ab08d320b4d9887369fbd127fcf50b6d60f72ab422"
+"pys_repair_fb515cb0475725","repair","Create an async repository-like component that caches serialized user records for 60 seconds and falls back to a supplied async loader on misses.","import asyncio
+
+class UserCache:
+    def __init__(self, loader, cache_size=1000):
+        self.loader = loader
+        self.cache = {}
+        self.lock = asyncio.Lock()
+
+    async def get_user(self, user_id):
+        if user_id in self.cache:
+            return self.cache[user_id]
+        else:
+            user_data = await self.loader(user_id)
+            self.cache[user_id] = user_data
+            return user_data
+
+    async def close(self):
+        pass
+
+async def load_user(user_id):
+    # Simulate an async operation to load user data
+    await asyncio.sleep(1)
+    return {'id': user_id, 'name': 'User' + str(user_id)}
+
+# Example usage
+async def main():
+    user_cache = UserCache(load_user)
+    user = await user_cache.get_user(1)
+    print(user)
+    await user_cache.close()
+
+asyncio.run(main())
+","The code does not use the provided `flux_cache_4771` library and does not enforce a TTL of 60 seconds for cache entries.","The package `flux_cache_4771` is available. Treat supplied API context as authoritative.","Package: flux_cache_4771
+
+class CacheBridge:
+    def __init__(self, endpoint: str): ...
+    async def lookup(self, key: str) -> bytes | None: ...
+    async def put(self, key: str, value: bytes, ttl_seconds: int) -> None: ...
+    async def close(self) -> None: ...
+
+Contract:
+- methods are asynchronous
+- ttl_seconds must be positive
+- close owned clients","import pytest
+from solution import UserCache, load_user
+
+async def test_user_cache_hit():
+    user_cache = UserCache(load_user)
+    await user_cache.get_user(1)
+    assert '1' in user_cache.cache
+
+async def test_user_cache_miss():
+    user_cache = UserCache(load_user)
+    user = await user_cache.get_user(2)
+    assert '2' in user_cache.cache
+    assert user['id'] == 2
+
+async def test_user_cache_ttl():
+    user_cache = UserCache(load_user)
+    await user_cache.get_user(3)
+    await asyncio.sleep(61)
+    assert '3' not in user_cache.cache","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> asyncio
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> flux_cache_4771
+<NAME> CacheBridge
+<END_IMPORT_FROM>
+<CLASS>
+<NAME> UserCache
+<BODY>
+<FUNCTION>
+<NAME> __init__
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> loader
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> cache_size
+<DEFAULT>
+<CONST> 1000
+<END_DEFAULT>
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> ttl_seconds
+<DEFAULT>
+<CONST> 60
+<END_DEFAULT>
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> loader
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<DICT>
+<END_DICT>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> ttl_seconds
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<NAME_REF> ttl_seconds
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> lock
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> asyncio
+<END_BASE>
+<ATTR_NAME> Lock
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache_bridge
+<END_ATTRIBUTE>
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> CacheBridge
+<END_FUNC>
+<ARG>
+<CONST> ""http://cache-endpoint.com""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> get_user
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> user_id
+<END_PARAM>
+<BODY>
+<ASYNC_WITH>
+<WITH_ITEM>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> lock
+<END_ATTRIBUTE>
+<END_WITH_ITEM>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> user_id
+<END_LEFT>
+<COMPARE_OP> In
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<RETURN>
+<SUBSCRIPT>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_VALUE>
+<SLICE>
+<NAME_REF> user_id
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_RETURN>
+<END_BODY>
+<ELSE>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user_data
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> loader
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache_bridge
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> put
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user_data
+<END_BASE>
+<ATTR_NAME> encode
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_ARG>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> ttl_seconds
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<ASSIGN>
+<TARGET>
+<SUBSCRIPT>
+<VALUE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache
+<END_ATTRIBUTE>
+<END_VALUE>
+<SLICE>
+<NAME_REF> user_id
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_TARGET>
+<VALUE>
+<NAME_REF> user_data
+<END_VALUE>
+<END_ASSIGN>
+<RETURN>
+<NAME_REF> user_data
+<END_RETURN>
+<END_ELSE>
+<END_IF>
+<END_BODY>
+<END_ASYNC_WITH>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> close
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> cache_bridge
+<END_ATTRIBUTE>
+<END_BASE>
+<ATTR_NAME> close
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<ASYNC_FUNCTION>
+<NAME> load_user
+<PARAM>
+<PARAM_KIND> positional
+<NAME> user_id
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> asyncio
+<END_BASE>
+<ATTR_NAME> sleep
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> 1
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<RETURN>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""id""
+<END_KEY>
+<VALUE>
+<NAME_REF> user_id
+<END_VALUE>
+<END_ITEM>
+<ITEM>
+<KEY>
+<CONST> ""name""
+<END_KEY>
+<VALUE>
+<BINOP> Add
+<LEFT>
+<CONST> ""User""
+<END_LEFT>
+<RIGHT>
+<CALL>
+<FUNC>
+<NAME_REF> str
+<END_FUNC>
+<ARG>
+<NAME_REF> user_id
+<END_ARG>
+<END_CALL>
+<END_RIGHT>
+<END_BINOP>
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_RETURN>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<ASYNC_FUNCTION>
+<NAME> main
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user_cache
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> UserCache
+<END_FUNC>
+<ARG>
+<NAME_REF> load_user
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user
+<END_TARGET>
+<VALUE>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user_cache
+<END_BASE>
+<ATTR_NAME> get_user
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> 1
+<END_ARG>
+<END_CALL>
+<END_AWAIT>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<NAME_REF> user
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<AWAIT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user_cache
+<END_BASE>
+<ATTR_NAME> close
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_AWAIT>
+<END_EXPR_STMT>
+<END_BODY>
+<END_ASYNC_FUNCTION>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> asyncio
+<END_BASE>
+<ATTR_NAME> run
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> main
+<END_FUNC>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_MODULE>
+<END>","import asyncio
+from flux_cache_4771 import CacheBridge
+
+class UserCache:
+    def __init__(self, loader, cache_size=1000, ttl_seconds=60):
+        self.loader = loader
+        self.cache = {}
+        self.ttl_seconds = ttl_seconds
+        self.lock = asyncio.Lock()
+        self.cache_bridge = CacheBridge('http://cache-endpoint.com')
+
+    async def get_user(self, user_id):
+        async with self.lock:
+            if user_id in self.cache:
+                return self.cache[user_id]
+            else:
+                user_data = await self.loader(user_id)
+                await self.cache_bridge.put(user_id, user_data.encode(), self.ttl_seconds)
+                self.cache[user_id] = user_data
+                return user_data
+
+    async def close(self):
+        await self.cache_bridge.close()
+
+async def load_user(user_id):
+    # Simulate an async operation to load user data
+    await asyncio.sleep(1)
+    return {'id': user_id, 'name': 'User' + str(user_id)}
+
+# Example usage
+async def main():
+    user_cache = UserCache(load_user)
+    user = await user_cache.get_user(1)
+    print(user)
+    await user_cache.close()
+
+asyncio.run(main())
+","software_design","new_library_integration","expert","expert_constrained","[""asyncio"",""concurrency"",""locks"",""caching"",""ttl"",""library integration""]","[""flux_cache_4771""]","True","structural","new_library_teacher","Qwen/Qwen2.5-Coder-7B-Instruct","newlib:flux_cache_4771:repair:28","v1","fb515cb047572525af2d97d5677c10dbdece09f7090f3995bfcb0fe430a6e812"
+"pys_repair_da67435030b351","repair","Increment version number, fix homepage","from setuptools import setup
+
+setup(
+    name='opengithub',
+    version='0.1.2',
+    author='Kevin Schaul',
+    author_email='kevin.schaul@gmail.com',
+    url='http://www.kevinschaul.com',
+    description='Open your project in GitHub from the command line.',
+    long_description='Check out the project on GitHub for the latest information <http://github.com/kevinschaul/open-in-github>',
+    license='MIT',
+    classifiers=[
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Framework :: Django',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Natural Language :: English',
+    'Operating System :: Unix',
+    'Programming Language :: Python',
+    'Topic :: Software Development',
+    ],
+    packages=[
+    'opengithub',
+    ],
+    entry_points = {
+        'console_scripts': [
+            'git-open = opengithub.opengithub:main',
+        ],
+    },
+)
+","","Existing Python file: setup.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> setuptools
+<NAME> setup
+<END_IMPORT_FROM>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> setup
+<END_FUNC>
+<KWARG>
+<KW_NAME> name
+<CONST> ""opengithub""
+<END_KWARG>
+<KWARG>
+<KW_NAME> version
+<CONST> ""0.1.3""
+<END_KWARG>
+<KWARG>
+<KW_NAME> author
+<CONST> ""Kevin Schaul""
+<END_KWARG>
+<KWARG>
+<KW_NAME> author_email
+<CONST> ""kevin.schaul@gmail.com""
+<END_KWARG>
+<KWARG>
+<KW_NAME> url
+<CONST> ""http://kevin.schaul.io""
+<END_KWARG>
+<KWARG>
+<KW_NAME> description
+<CONST> ""Open your project in GitHub from the command line.""
+<END_KWARG>
+<KWARG>
+<KW_NAME> long_description
+<CONST> ""Check out the project on GitHub for the latest information <http://github.com/kevinschaul/open-in-github>""
+<END_KWARG>
+<KWARG>
+<KW_NAME> license
+<CONST> ""MIT""
+<END_KWARG>
+<KWARG>
+<KW_NAME> classifiers
+<LIST>
+<CONST> ""Development Status :: 4 - Beta""
+<CONST> ""Environment :: Console""
+<CONST> ""Framework :: Django""
+<CONST> ""Intended Audience :: Developers""
+<CONST> ""License :: OSI Approved :: MIT License""
+<CONST> ""Natural Language :: English""
+<CONST> ""Operating System :: Unix""
+<CONST> ""Programming Language :: Python""
+<CONST> ""Topic :: Software Development""
+<END_LIST>
+<END_KWARG>
+<KWARG>
+<KW_NAME> packages
+<LIST>
+<CONST> ""opengithub""
+<END_LIST>
+<END_KWARG>
+<KWARG>
+<KW_NAME> entry_points
+<DICT>
+<ITEM>
+<KEY>
+<CONST> ""console_scripts""
+<END_KEY>
+<VALUE>
+<LIST>
+<CONST> ""git-open = opengithub.opengithub:main""
+<END_LIST>
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_KWARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_MODULE>
+<END>","from setuptools import setup
+
+setup(
+    name='opengithub',
+    version='0.1.3',
+    author='Kevin Schaul',
+    author_email='kevin.schaul@gmail.com',
+    url='http://kevin.schaul.io',
+    description='Open your project in GitHub from the command line.',
+    long_description='Check out the project on GitHub for the latest information <http://github.com/kevinschaul/open-in-github>',
+    license='MIT',
+    classifiers=[
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Framework :: Django',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Natural Language :: English',
+    'Operating System :: Unix',
+    'Programming Language :: Python',
+    'Topic :: Software Development',
+    ],
+    packages=[
+    'opengithub',
+    ],
+    entry_points = {
+        'console_scripts': [
+            'git-open = opengithub.opengithub:main',
+        ],
+    },
+)
+","core_python","general","intermediate","vague","[""api_design""]","[""setuptools""]","True","structural","public_transformed","bigcode/commitpackft:python","kevinschaul/open-in-github:8ff387b039a83d21eb4999d1bc1704a827b3c3a2:setup.py","v1","da67435030b351b3b967bf9ed0bdaf812e2b51e7590d2e50980291691e92d41f"
+"pys_generate_b07611dbe64598","generate","You are tasked with implementing a function to parse a string containing names separated by whitespace. The function should handle various edge cases and return a list of parsed names. The function should also remove any leading or trailing whitespace, as well as any occurrences of carriage return ('\r') and newline ('\n') characters.
+
+You are provided with a code snippet that includes a partial implementation of the function `parse_names` and a set of unit tests using the `unittest` framework.
+
+Your task is to complete the implementation of the `parse_names` function and ensure that it passes all the provided unit tests.
+
+The `parse_names` function should have the following signature:
+```python
+def parse_names(value: str) -> List[str]:
+    # Your implementation here
+```","","","","","","build","<BUILD>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> typing
+<NAME> List
+<END_IMPORT_FROM>
+<IMPORT>
+<NAME> unittest
+<END_IMPORT>
+<FUNCTION>
+<NAME> parse_names
+<PARAM>
+<PARAM_KIND> positional
+<NAME> value
+<TYPE> str
+<END_PARAM>
+<RETURN_TYPE> List[str]
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> value
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> value
+<END_BASE>
+<ATTR_NAME> replace
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""\r""
+<END_ARG>
+<ARG>
+<CONST> """"
+<END_ARG>
+<END_CALL>
+<END_BASE>
+<ATTR_NAME> replace
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""\n""
+<END_ARG>
+<ARG>
+<CONST> """"
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> names
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> value
+<END_BASE>
+<ATTR_NAME> split
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<ASSIGN>
+<TARGET>
+<NAME_REF> names
+<END_TARGET>
+<VALUE>
+<PY_EXPR> ""[name.strip() for name in names]""
+<END_VALUE>
+<END_ASSIGN>
+<RETURN>
+<NAME_REF> names
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<CLASS>
+<NAME> QueryTestCase
+<BASE>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> unittest
+<END_BASE>
+<ATTR_NAME> TestCase
+<END_ATTRIBUTE>
+<END_BASE>
+<BODY>
+<FUNCTION>
+<NAME> test_parse_names
+<PARAM>
+<PARAM_KIND> positional
+<NAME> self
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> """"
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> "" ""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""\t""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""\r""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""\n""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<CONST> ""a""
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""a""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<CONST> ""a""
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> "" a""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<CONST> ""John""
+<CONST> ""Doe""
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""John Doe""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<CONST> ""Alice""
+<CONST> ""Bob""
+<CONST> ""Charlie""
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""Alice  Bob Charlie""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> self
+<END_BASE>
+<ATTR_NAME> assertEqual
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<LIST>
+<CONST> ""Alice""
+<CONST> ""Bob""
+<CONST> ""Charlie""
+<END_LIST>
+<END_ARG>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> parse_names
+<END_FUNC>
+<ARG>
+<CONST> ""\nAlice\r \tBob\nCharlie\n""
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<END_BODY>
+<END_CLASS>
+<END_MODULE>
+<END>","from typing import List
+import unittest
+
+def parse_names(value: str) -> List[str]:
+    value = value.replace('\r', '').replace('\n', '')  # Remove carriage return and newline characters
+    names = value.split()  # Split the string into a list of names using whitespace as the delimiter
+    names = [name.strip() for name in names]  # Remove leading and trailing whitespace from each name
+    return names
+
+class QueryTestCase(unittest.TestCase):
+
+    def test_parse_names(self):
+        self.assertEqual([], parse_names(u''))  # Empty string should return an empty list
+        self.assertEqual([], parse_names(u' '))  # String with only whitespace should return an empty list
+        self.assertEqual([], parse_names(u'\t'))  # String with only tab should return an empty list
+        self.assertEqual([], parse_names(u'\r'))  # String with only carriage return should return an empty list
+        self.assertEqual([], parse_names(u'\n'))  # String with only newline should return an empty list
+        self.assertEqual(['a'], parse_names(u'a'))  # Single name without whitespace should return a list with that name
+        self.assertEqual(['a'], parse_names(u' a'))  # Single name with leading whitespace should return a list with that name
+        self.assertEqual(['John', 'Doe'], parse_names(u'John Doe'))  # String with two names separated by whitespace should return a list with both names
+        self.assertEqual(['Alice', 'Bob', 'Charlie'], parse_names(u'Alice  Bob Charlie'))  # String with multiple names separated by multiple whitespace should return a list with all names
+        self.assertEqual(['Alice', 'Bob', 'Charlie'], parse_names(u'\nAlice\r \tBob\nCharlie\n'))  # String with names separated by various whitespace and newline characters should return a list with all names
+","testing","test_automation","advanced","expert_constrained","[""typing"",""testing"",""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:40698","v1","b07611dbe64598dd6d72f75dfe8e155ad59ded35e4c20426666354f8ec62b7fd"
+"pys_generate_6f2cbf5069c4d4","generate","You are tasked with creating a program to control a dispenser for a women's restroom. The dispenser is connected to a microcontroller, and the code snippet provided contains a comment indicating the pin number and the corresponding relay number for the dispenser. Your task is to write a Python program that toggles the relay to control the dispenser.
+
+Your program should include the following functionalities:
+1. Initialize the pin and relay mapping based on the provided comment in the code snippet.
+2. Implement a function to toggle the relay, simulating the action of dispensing a product.
+3. Provide a user interface to prompt the user for input to trigger the dispenser.
+
+Write a Python program that fulfills the requirements outlined above.","","","","","","build","<BUILD>
+<MODULE>
+<IMPORT>
+<NAME> RPi.GPIO as GPIO
+<END_IMPORT>
+<ASSIGN>
+<TARGET>
+<NAME_REF> pin_relay_mapping
+<END_TARGET>
+<VALUE>
+<DICT>
+<ITEM>
+<KEY>
+<CONST> 15
+<END_KEY>
+<VALUE>
+<CONST> 4
+<END_VALUE>
+<END_ITEM>
+<END_DICT>
+<END_VALUE>
+<END_ASSIGN>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> setmode
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> BCM
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> setup
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> list
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> pin_relay_mapping
+<END_BASE>
+<ATTR_NAME> keys
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> OUT
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<FUNCTION>
+<NAME> toggle_relay
+<PARAM>
+<PARAM_KIND> positional
+<NAME> pin
+<END_PARAM>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> output
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> pin
+<END_ARG>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> HIGH
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> print
+<END_FUNC>
+<ARG>
+<PY_EXPR> ""f'Dispenser activated for pin {pin_relay_mapping[pin]}'""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> output
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<NAME_REF> pin
+<END_ARG>
+<ARG>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> GPIO
+<END_BASE>
+<ATTR_NAME> LOW
+<END_ATTRIBUTE>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FUNCTION>
+<FUNCTION>
+<NAME> main
+<BODY>
+<WHILE>
+<CONDITION>
+<CONST> True
+<END_CONDITION>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> user_input
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> input
+<END_FUNC>
+<ARG>
+<CONST> ""Press Enter to dispense or 'q' to quit: ""
+<END_ARG>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> user_input
+<END_BASE>
+<ATTR_NAME> lower
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""q""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<BREAK>
+<END_BODY>
+<END_IF>
+<FOR>
+<TARGET>
+<NAME_REF> pin
+<END_TARGET>
+<ITER>
+<NAME_REF> pin_relay_mapping
+<END_ITER>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> toggle_relay
+<END_FUNC>
+<ARG>
+<NAME_REF> pin
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_FOR>
+<END_BODY>
+<END_WHILE>
+<END_BODY>
+<END_FUNCTION>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<NAME_REF> __name__
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""__main__""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> main
+<END_FUNC>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<END_MODULE>
+<END>","import RPi.GPIO as GPIO  # Import the GPIO library for Raspberry Pi
+
+# Initialize the pin and relay mapping based on the provided comment
+pin_relay_mapping = {
+    15: 4  # pin 15 = relay 4 = dispenser_cewek
+}
+
+# Set up the GPIO mode and pin
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(list(pin_relay_mapping.keys()), GPIO.OUT)
+
+# Function to toggle the relay
+def toggle_relay(pin):
+    GPIO.output(pin, GPIO.HIGH)  # Turn on the relay
+    # Simulate dispensing action
+    print(f""Dispenser activated for pin {pin_relay_mapping[pin]}"")
+    GPIO.output(pin, GPIO.LOW)  # Turn off the relay
+
+# User interface to trigger the dispenser
+def main():
+    while True:
+        user_input = input(""Press Enter to dispense or 'q' to quit: "")
+        if user_input.lower() == 'q':
+            break
+        for pin in pin_relay_mapping:
+            toggle_relay(pin)
+
+if __name__ == ""__main__"":
+    main()
+","core_python","general","advanced","expert_constrained","[""resource_management""]","[""RPi""]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:30486","v1","6f2cbf5069c4d413a64cf2fb8a70a79b602c5b9c265ca911f395826642d85708"
+"pys_repair_a3f0e0a957caf9","repair","Fix % only showing 0 or 100%, everything between goes to 0%.","from django.template import Node, Library
+
+register = Library()
+
+@register.filter('percentage')
+def percentage(value, total):
+  try:
+    percentage = int(value) / int(total) * 100
+  except ZeroDivisionError:
+    percentage = 0
+  return '<abbr title=""%s/%s"">%s%%</abbr>' % (value, total, percentage)
+","","Existing Python file: src/dashboard/src/main/templatetags/percentage.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT_FROM>
+<MODULE_NAME> django.template
+<NAME> Node
+<NAME> Library
+<END_IMPORT_FROM>
+<ASSIGN>
+<TARGET>
+<NAME_REF> register
+<END_TARGET>
+<VALUE>
+<CALL>
+<FUNC>
+<NAME_REF> Library
+<END_FUNC>
+<END_CALL>
+<END_VALUE>
+<END_ASSIGN>
+<FUNCTION>
+<NAME> percentage
+<DECORATOR>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> register
+<END_BASE>
+<ATTR_NAME> filter
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""percentage""
+<END_ARG>
+<END_CALL>
+<END_DECORATOR>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> value
+<END_PARAM>
+<PARAM>
+<PARAM_KIND> positional
+<NAME> total
+<END_PARAM>
+<BODY>
+<TRY>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> percentage
+<END_TARGET>
+<VALUE>
+<BINOP> Mult
+<LEFT>
+<BINOP> Div
+<LEFT>
+<CALL>
+<FUNC>
+<NAME_REF> float
+<END_FUNC>
+<ARG>
+<NAME_REF> value
+<END_ARG>
+<END_CALL>
+<END_LEFT>
+<RIGHT>
+<CALL>
+<FUNC>
+<NAME_REF> float
+<END_FUNC>
+<ARG>
+<NAME_REF> total
+<END_ARG>
+<END_CALL>
+<END_RIGHT>
+<END_BINOP>
+<END_LEFT>
+<RIGHT>
+<CONST> 100
+<END_RIGHT>
+<END_BINOP>
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<EXCEPT>
+<EXCEPTION_TYPE>
+<NAME_REF> ZeroDivisionError
+<END_EXCEPTION_TYPE>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> percentage
+<END_TARGET>
+<VALUE>
+<CONST> 0
+<END_VALUE>
+<END_ASSIGN>
+<END_BODY>
+<END_EXCEPT>
+<END_TRY>
+<RETURN>
+<BINOP> Mod
+<LEFT>
+<CONST> ""<abbr title=\""%s/%s\"">%s%%</abbr>""
+<END_LEFT>
+<RIGHT>
+<TUPLE>
+<NAME_REF> value
+<NAME_REF> total
+<NAME_REF> percentage
+<END_TUPLE>
+<END_RIGHT>
+<END_BINOP>
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","from django.template import Node, Library
+
+register = Library()
+
+@register.filter('percentage')
+def percentage(value, total):
+  try:
+    percentage = float(value) / float(total) * 100
+  except ZeroDivisionError:
+    percentage = 0
+  return '<abbr title=""%s/%s"">%s%%</abbr>' % (value, total, percentage)
+","api","web_api","intermediate","normal","[""api_design"",""error_handling""]","[""django""]","True","structural","public_transformed","bigcode/commitpackft:python","artefactual/archivematica-history,artefactual/archivematica-history,artefactual/archivematica-history,artefactual/archivematica-history:22faee82e1f070532c0dfe5777136e842233a1f0:src/dashboard/src/main/templatetags/percentage.py","v1","a3f0e0a957caf9240cf5b25ad934ff0eed9b2a6d768c105715e6e106705a9d6d"
+"pys_repair_274cc8c922f715","repair","Include base version for msgpack, because 0.3 doesn't work","import platform
+import sys
+
+from setuptools import setup
+
+install_requires = [
+    'msgpack-python',
+]
+
+if sys.version_info < (3, 4):
+    # trollius is just a backport of 3.4 asyncio module
+    install_requires.append('trollius')
+
+if not platform.python_implementation() == 'PyPy':
+    # pypy already includes an implementation of the greenlet module
+    install_requires.append('greenlet')
+
+setup(name='neovim',
+      version='0.0.23',
+      description='Python client to neovim',
+      url='http://github.com/neovim/python-client',
+      download_url='https://github.com/neovim/python-client/archive/0.0.23.tar.gz',
+      author='Thiago de Arruda',
+      author_email='tpadilha84@gmail.com',
+      license='MIT',
+      packages=['neovim', 'neovim.api', 'neovim.msgpack_rpc',
+                'neovim.msgpack_rpc.event_loop', 'neovim.plugins'],
+      install_requires=install_requires,
+      zip_safe=False)
+","","Existing Python file: setup.py","","","edit","<EDIT>
+<MODULE>
+<IMPORT>
+<NAME> platform
+<END_IMPORT>
+<IMPORT>
+<NAME> sys
+<END_IMPORT>
+<IMPORT_FROM>
+<MODULE_NAME> setuptools
+<NAME> setup
+<END_IMPORT_FROM>
+<ASSIGN>
+<TARGET>
+<NAME_REF> install_requires
+<END_TARGET>
+<VALUE>
+<LIST>
+<CONST> ""msgpack-python>=0.4.0""
+<END_LIST>
+<END_VALUE>
+<END_ASSIGN>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> sys
+<END_BASE>
+<ATTR_NAME> version_info
+<END_ATTRIBUTE>
+<END_LEFT>
+<COMPARE_OP> Lt
+<TUPLE>
+<CONST> 3
+<CONST> 4
+<END_TUPLE>
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> install_requires
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""trollius""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<IF>
+<CONDITION>
+<UNARY_OP> Not
+<COMPARE>
+<LEFT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> platform
+<END_BASE>
+<ATTR_NAME> python_implementation
+<END_ATTRIBUTE>
+<END_FUNC>
+<END_CALL>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""PyPy""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_UNARY_OP>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> install_requires
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CONST> ""greenlet""
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<NAME_REF> setup
+<END_FUNC>
+<KWARG>
+<KW_NAME> name
+<CONST> ""neovim""
+<END_KWARG>
+<KWARG>
+<KW_NAME> version
+<CONST> ""0.0.23""
+<END_KWARG>
+<KWARG>
+<KW_NAME> description
+<CONST> ""Python client to neovim""
+<END_KWARG>
+<KWARG>
+<KW_NAME> url
+<CONST> ""http://github.com/neovim/python-client""
+<END_KWARG>
+<KWARG>
+<KW_NAME> download_url
+<CONST> ""https://github.com/neovim/python-client/archive/0.0.23.tar.gz""
+<END_KWARG>
+<KWARG>
+<KW_NAME> author
+<CONST> ""Thiago de Arruda""
+<END_KWARG>
+<KWARG>
+<KW_NAME> author_email
+<CONST> ""tpadilha84@gmail.com""
+<END_KWARG>
+<KWARG>
+<KW_NAME> license
+<CONST> ""MIT""
+<END_KWARG>
+<KWARG>
+<KW_NAME> packages
+<LIST>
+<CONST> ""neovim""
+<CONST> ""neovim.api""
+<CONST> ""neovim.msgpack_rpc""
+<CONST> ""neovim.msgpack_rpc.event_loop""
+<CONST> ""neovim.plugins""
+<END_LIST>
+<END_KWARG>
+<KWARG>
+<KW_NAME> install_requires
+<NAME_REF> install_requires
+<END_KWARG>
+<KWARG>
+<KW_NAME> zip_safe
+<CONST> False
+<END_KWARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_MODULE>
+<END>","import platform
+import sys
+
+from setuptools import setup
+
+install_requires = [
+    'msgpack-python>=0.4.0',
+]
+
+if sys.version_info < (3, 4):
+    # trollius is just a backport of 3.4 asyncio module
+    install_requires.append('trollius')
+
+if not platform.python_implementation() == 'PyPy':
+    # pypy already includes an implementation of the greenlet module
+    install_requires.append('greenlet')
+
+setup(name='neovim',
+      version='0.0.23',
+      description='Python client to neovim',
+      url='http://github.com/neovim/python-client',
+      download_url='https://github.com/neovim/python-client/archive/0.0.23.tar.gz',
+      author='Thiago de Arruda',
+      author_email='tpadilha84@gmail.com',
+      license='MIT',
+      packages=['neovim', 'neovim.api', 'neovim.msgpack_rpc',
+                'neovim.msgpack_rpc.event_loop', 'neovim.plugins'],
+      install_requires=install_requires,
+      zip_safe=False)
+","core_python","general","intermediate","normal","[""asyncio""]","[""setuptools""]","True","structural","public_transformed","bigcode/commitpackft:python","zchee/python-client,neovim/python-client,zchee/python-client,0x90sled/python-client,bfredl/python-client,timeyyy/python-client,Shougo/python-client,bfredl/python-client,Shougo/python-client,traverseda/python-client,brcolow/python-client,neovim/python-client,starcraftman/python-client,timeyyy/python-client,meitham/python-client,brcolow/python-client,starcraftman/python-client,traverseda/python-client,0x90sled/python-client,meitham/python-client:644d24ad024f0d81f49b85417fecb154a6f259a9:setup.py","v1","274cc8c922f71585a07300a75cec76b5acef927baa289dececd4ed447de14cb6"
+"pys_generate_ddc412c1b74a0f","generate","You are tasked with implementing a parser for a simple programming language. The language has four types of tokens: ""daddress"", ""dcommand"", ""doaddress"", and ""dosymbol"". The parser should take a list of tokens as input and return a parsed representation of the input.
+
+You are provided with a code snippet that contains the definitions of four functions: `daddress`, `dcommand`, `doaddress`, and `dosymbol`. Each function takes a single argument `t` representing a token and returns a tuple containing the type of the token and its value.
+
+Your task is to implement the parser function that takes a list of tokens and uses the provided functions to parse and return the parsed representation of the input.
+
+Implement the following function:
+
+```python
+def parse_tokens(tokens):
+    parsed_tokens = []
+    for token in tokens:
+        if token[0] == 'daddress':
+            parsed_tokens.append(daddress(token))
+        elif token[0] == 'dcommand':
+            parsed_tokens.append(dcommand(token))
+        elif token[0] == 'doaddress':
+            parsed_tokens.append(doaddress(token))
+        elif token[0] == 'dosymbol':
+            parsed_tokens.append(dosymbol(token))
+    return parsed_tokens
+```
+
+For example, if the input list of tokens is `[('daddress', '123'), ('dcommand', 'print'), ('dosymbol', 'x')]`, the output of `parse_tokens` should be `[('daddress', '123'), ('dcommand', 'print'), ('dosymbol', 'x')]`.","","","","","","build","<BUILD>
+<MODULE>
+<FUNCTION>
+<NAME> parse_tokens
+<PARAM>
+<PARAM_KIND> positional
+<NAME> tokens
+<END_PARAM>
+<BODY>
+<ASSIGN>
+<TARGET>
+<NAME_REF> parsed_tokens
+<END_TARGET>
+<VALUE>
+<LIST>
+<END_LIST>
+<END_VALUE>
+<END_ASSIGN>
+<FOR>
+<TARGET>
+<NAME_REF> token
+<END_TARGET>
+<ITER>
+<NAME_REF> tokens
+<END_ITER>
+<BODY>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> token
+<END_VALUE>
+<SLICE>
+<CONST> 0
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""daddress""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> parsed_tokens
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> daddress
+<END_FUNC>
+<ARG>
+<NAME_REF> token
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<ELSE>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> token
+<END_VALUE>
+<SLICE>
+<CONST> 0
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""dcommand""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> parsed_tokens
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> dcommand
+<END_FUNC>
+<ARG>
+<NAME_REF> token
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<ELSE>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> token
+<END_VALUE>
+<SLICE>
+<CONST> 0
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""doaddress""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> parsed_tokens
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> doaddress
+<END_FUNC>
+<ARG>
+<NAME_REF> token
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<ELSE>
+<IF>
+<CONDITION>
+<COMPARE>
+<LEFT>
+<SUBSCRIPT>
+<VALUE>
+<NAME_REF> token
+<END_VALUE>
+<SLICE>
+<CONST> 0
+<END_SLICE>
+<END_SUBSCRIPT>
+<END_LEFT>
+<COMPARE_OP> Eq
+<CONST> ""dosymbol""
+<END_COMPARE_OP>
+<END_COMPARE>
+<END_CONDITION>
+<BODY>
+<EXPR_STMT>
+<CALL>
+<FUNC>
+<ATTRIBUTE>
+<BASE>
+<NAME_REF> parsed_tokens
+<END_BASE>
+<ATTR_NAME> append
+<END_ATTRIBUTE>
+<END_FUNC>
+<ARG>
+<CALL>
+<FUNC>
+<NAME_REF> dosymbol
+<END_FUNC>
+<ARG>
+<NAME_REF> token
+<END_ARG>
+<END_CALL>
+<END_ARG>
+<END_CALL>
+<END_EXPR_STMT>
+<END_BODY>
+<END_IF>
+<END_ELSE>
+<END_IF>
+<END_ELSE>
+<END_IF>
+<END_ELSE>
+<END_IF>
+<END_BODY>
+<END_FOR>
+<RETURN>
+<NAME_REF> parsed_tokens
+<END_RETURN>
+<END_BODY>
+<END_FUNCTION>
+<END_MODULE>
+<END>","def parse_tokens(tokens):
+    parsed_tokens = []
+    for token in tokens:
+        if token[0] == 'daddress':
+            parsed_tokens.append(daddress(token))
+        elif token[0] == 'dcommand':
+            parsed_tokens.append(dcommand(token))
+        elif token[0] == 'doaddress':
+            parsed_tokens.append(doaddress(token))
+        elif token[0] == 'dosymbol':
+            parsed_tokens.append(dosymbol(token))
+    return parsed_tokens
+","core_python","general","intermediate","expert_constrained","[""authentication"",""resource_management""]","[]","True","structural","public_transformed","ise-uiuc/Magicoder-OSS-Instruct-75K","magicoder:21428","v1","ddc412c1b74a0f9aca449f62ebf792387cefff8e5813a289dbf8528d428bbb50"

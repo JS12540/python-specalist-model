@@ -1,0 +1,81 @@
+{
+  "rows": 29,
+  "columns": 24,
+  "unique_ids": true,
+  "unique_hashes": true,
+  "new_library_fraction": 0.27586206896551724,
+  "task_distribution": {
+    "repair": 11,
+    "generate": 11,
+    "refactor": 6,
+    "full_file_generate": 1
+  },
+  "source_distribution": {
+    "public_transformed": 16,
+    "new_library_teacher": 8,
+    "qwen_teacher_synthetic": 5
+  },
+  "difficulty_distribution": {
+    "intermediate": 15,
+    "advanced": 9,
+    "expert": 3,
+    "beginner": 2
+  },
+  "style_distribution": {
+    "normal": 12,
+    "expert_constrained": 12,
+    "vague": 3,
+    "detailed": 2
+  },
+  "verification_distribution": {
+    "structural": 29
+  },
+  "domain_distribution": {
+    "core_python": 13,
+    "software_design": 4,
+    "data_engineering": 2,
+    "security": 2,
+    "reliability": 2,
+    "concurrency": 1,
+    "database": 1,
+    "networking": 1,
+    "asyncio": 1,
+    "testing": 1,
+    "api": 1
+  },
+  "student_model": "Salesforce/codet5p-220m-py",
+  "teacher_model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "ir_version": "v1",
+  "dataset_columns": [
+    "id",
+    "task",
+    "instruction",
+    "code_before",
+    "error",
+    "project_context",
+    "library_context",
+    "tests",
+    "target_mode",
+    "target_ir",
+    "target_code",
+    "domain",
+    "subdomain",
+    "difficulty",
+    "instruction_style",
+    "concepts",
+    "libraries",
+    "verified",
+    "verification_level",
+    "source_type",
+    "source_dataset",
+    "source_reference",
+    "ir_version",
+    "content_hash"
+  ],
+  "task_targets": {
+    "generate": 50000,
+    "full_file_generate": 50000,
+    "repair": 50000,
+    "refactor": 50000
+  }
+}
